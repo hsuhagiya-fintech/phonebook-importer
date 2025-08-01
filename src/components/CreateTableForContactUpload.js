@@ -122,7 +122,7 @@ export default function CreateTableForContactUpload() {
                 className="search-input"
               />
             </div>
-            <div className="header-actions">
+            <div className="header-actions-right">
               <button
                 onClick={handleExportValidData}
                 className="export-btn"
@@ -141,21 +141,29 @@ export default function CreateTableForContactUpload() {
                 </svg>
                 Export Valid Data
               </button>
-              <div className="counts">
+              <div className="counts-horizontal">
                 <div className="count-box total">
                   <span className="count-label">Total:</span>
-                  <span className="count-value">{data.length}</span>
+                  <span className="count-value">
+                    {data.length.toLocaleString("en-IN")}
+                  </span>
                 </div>
+
                 <div className="count-box valid">
                   <span className="count-label">Valid:</span>
                   <span className="count-value">
-                    {data.filter((d) => !d.hasError).length}
+                    {data
+                      .filter((d) => !d.hasError)
+                      .length.toLocaleString("en-IN")}
                   </span>
                 </div>
+
                 <div className="count-box error">
                   <span className="count-label">Errors:</span>
                   <span className="count-value">
-                    {data.filter((d) => d.hasError).length}
+                    {data
+                      .filter((d) => d.hasError)
+                      .length.toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>
@@ -287,7 +295,10 @@ export default function CreateTableForContactUpload() {
           </div>
         </>
       ) : (
-        <p className="upload-message">Parsing file...</p>
+        <div className="upload-loader">
+          <div className="spinner"></div>
+          <p className="upload-message">Parsing file, please wait...</p>
+        </div>
       )}
     </div>
   );

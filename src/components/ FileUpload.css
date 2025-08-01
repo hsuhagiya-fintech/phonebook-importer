@@ -1,88 +1,184 @@
-.container{
+.container {
     background-color: white;
     color: black;
+    width: 100%;
     max-width: 600px;
     padding: 16px;
     margin: 0 auto;
     align-items: center;
+    box-sizing: border-box;
 }
 
-.phonebook-title{
-    font-size:2.5rem;
-    font-weight:black;
+.phonebook-title {
+    font-size: clamp(1.8rem, 5vw, 2.5rem); /* Responsive font size */
+    font-weight: bold;
     text-align: center;
-    margin-bottom:20px;
+    margin-bottom: 20px;
 }
 
-.phonebook-subtitle{
-    font-size: 1.2rem;
+.phonebook-subtitle {
+    font-size: clamp(1rem, 2.5vw, 1.2rem); /* Responsive font size */
     color: #6c7a89;
     text-align: center;
     margin-bottom: 32px;
     margin-top: 10px;
+    padding: 0 10px;
 }
 
-.upload-card{
-    border:floralwhite;
+.upload-card {
+    border: none;
+    border-radius: 10px;
+    text-align: center;
+    background-color: #f8fafc;
+    border-radius: 10px;
+    padding: 32px 20px;
+    margin: 70px auto 0;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+    width: 90%;
+    max-width: 800px;
+    min-height: 50vh;
+    box-sizing: border-box;
+}
+
+.upload-title {
+    font-size: clamp(1rem, 3vw, 1.2rem);
+    font-weight: bold;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.upload-desc {
+    text-align: center;
+    color: #6c757d;
+    margin-bottom: 40px;
+    padding: 0 10px;
+}
+
+.file-upload-label {
+    display: flex;
+    flex-direction: column;
+    border: 2px dashed #bfc9d8;
     border-radius: 10px;
     text-align: center;
     align-items: center;
     justify-content: center;
-    background-color:#f8fafc;
+    padding: 20px 15px;
+    cursor: pointer;
+    margin-bottom: 30px;
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 0.3s ease;
+}
+
+.file-upload-label:hover {
+    border-color: #4a90e2;
+    background-color: #f0f7ff;
+}
+
+.upload-input {
+    display: none; /* Hide the default file input */
+}
+
+/* Add some responsive behavior for smaller screens */
+@media (max-width: 768px) {
+    .upload-card {
+        margin-top: 40px;
+        padding: 24px 15px;
+        min-height: 40vh;
+    }
+    
+    .phonebook-title {
+        margin-bottom: 15px;
+    }
+    
+    .phonebook-subtitle {
+        margin-bottom: 24px;
+    }
+}
+
+/* Add these styles to your existing CSS */
+
+.file-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.drop-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 40px 20px;
+    border: 2px dashed #bfc9d8;
     border-radius: 10px;
-    padding: 32px;
-    margin-top: 70px;
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
-    margin-left: 200px;
-    margin-right: 200px;
-    min-height: 50vh;
-    
-    
-}
-
-
-.upload-title{
-    display: flex;
-  flex-direction: column;
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap:8px;
-
-}
-
-.upload-desc{
-    align-items: center;
+    background-color: #f8fafc;
     text-align: center;
-    color:#6c757d;
-    margin-bottom: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.upload-icon{
-    font-size: 2.5rem;
-    align-items: center;
-    color: #6c7a89;
-    padding: 10px;
+.drop-zone:hover {
+    border-color: #4a90e2;
+    background-color: #f0f7ff;
 }
 
-.file-upload-label{
-  display: flex;
-  flex-direction: column;
-  border: 2px dashed #bfc9d8;
-  border-radius: 10px;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-  padding: 15px;
-  cursor: pointer;
-  margin-bottom: 30px;
-  
+.drop-zone p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 1rem;
 }
 
+.upload-btn {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-.upload-input{
-    margin-top: 12px;
-    margin-bottom: 10px;
+.upload-btn:hover {
+    background-color: #3a7bc8;
+}
+
+.or-text {
+    margin: 10px 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.file-name {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #4a90e2;
+    font-weight: 500;
+}
+
+@media (max-width: 480px) {
+    .upload-card {
+        margin-top: 30px;
+        padding: 20px 10px;
+        min-height: 30vh;
+    }
+    
+    .file-upload-label {
+        padding: 15px 10px;
+    }
+    
+    .upload-desc {
+        margin-bottom: 30px;
+    }
 }
