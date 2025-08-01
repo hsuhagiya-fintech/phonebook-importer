@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import * as XLSX from "xlsx";
 import { useLocation } from "react-router-dom";
 import "./CreateTableForContactUpload.css";
@@ -9,11 +9,13 @@ export default function CreateTableForContactUpload() {
   const file = location.state?.file;
 
   const [data, setData] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [editingRow, setEditingRow] = useState(null);
   const [editData, setEditData] = useState({});
-  const [searchTerm, setSearchTerm] = useState(""); // ✅ added
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dataFilter, setDataFilter] = useState("all");
 
   useEffect(() => {
     if (!file) return;
@@ -27,14 +29,42 @@ export default function CreateTableForContactUpload() {
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
       const validatedData = jsonData.map(validateRow);
       setData(validatedData);
+      setOriginalData(validatedData);
     };
-
     reader.readAsBinaryString(file);
   }, [file]);
 
+  // Memoized filtered and searched data (no sorting)
+  const processedData = useMemo(() => {
+    let result = [...data];
+
+    // Apply filter
+    if (dataFilter === "valid") {
+      result = result.filter((row) => !row.hasError);
+    } else if (dataFilter === "invalid") {
+      result = result.filter((row) => row.hasError);
+    }
+
+    // Apply search
+    if (searchTerm) {
+      result = result.filter((row) =>
+        VISIBLE_HEADERS.some((key) =>
+          String(row[key]).toLowerCase().includes(searchTerm)
+        )
+      );
+    }
+
+    return result;
+  }, [data, dataFilter, searchTerm]);
+
+  const handleFilterChange = (filterType) => {
+    setDataFilter(filterType);
+    setCurrentPage(1);
+  };
+
   const handleEdit = (rowIndex) => {
     setEditingRow(rowIndex);
-    setEditData({ ...data[rowIndex] });
+    setEditData({ ...processedData[rowIndex] });
   };
 
   const handleEditChange = (key, value) => {
@@ -44,7 +74,9 @@ export default function CreateTableForContactUpload() {
   const handleSave = (rowIndex) => {
     const validatedRow = validateRow(editData);
     const newData = [...data];
-    newData[rowIndex] = validatedRow;
+    // Find the absolute index in the original data
+    const absoluteIndex = (currentPage - 1) * rowsPerPage + rowIndex;
+    newData[absoluteIndex] = validatedRow;
     setData(newData);
     setEditingRow(null);
     setEditData({});
@@ -61,11 +93,19 @@ export default function CreateTableForContactUpload() {
   };
 
   const handleExportValidData = () => {
-    const validData = data.filter((row) => !row.hasError);
+    const validData = processedData.filter((row) => !row.hasError);
     const worksheet = XLSX.utils.json_to_sheet(validData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Valid Contacts");
     XLSX.writeFile(workbook, "valid_contacts.xlsx");
+  };
+
+  const handleExportInValidData = () => {
+    const invalidData = processedData.filter((row) => row.hasError);
+    const worksheet = XLSX.utils.json_to_sheet(invalidData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "InValid Contacts");
+    XLSX.writeFile(workbook, "invalid_contacts.xlsx");
   };
 
   if (!file) {
@@ -76,17 +116,12 @@ export default function CreateTableForContactUpload() {
     );
   }
 
-  const filteredData = data.filter((row) =>
-    VISIBLE_HEADERS.some((key) =>
-      String(row[key]).toLowerCase().includes(searchTerm)
-    )
-  );
-
-  const totalEntries = filteredData.length;
+  // Pagination logic
+  const totalEntries = processedData.length;
   const totalPages = Math.ceil(totalEntries / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = Math.min(startIndex + rowsPerPage, totalEntries);
-  const paginatedData = filteredData.slice(startIndex, endIndex);
+  const paginatedData = processedData.slice(startIndex, endIndex);
 
   const handleRowsChange = (e) => {
     setRowsPerPage(Number(e.target.value));
@@ -126,7 +161,7 @@ export default function CreateTableForContactUpload() {
               <button
                 onClick={handleExportValidData}
                 className="export-btn"
-                disabled={data.filter((d) => !d.hasError).length === 0}
+                disabled={processedData.filter((d) => !d.hasError).length === 0}
               >
                 <svg
                   className="download-icon"
@@ -141,18 +176,37 @@ export default function CreateTableForContactUpload() {
                 </svg>
                 Export Valid Data
               </button>
+
+              <button
+                onClick={handleExportInValidData}
+                className="export-btn"
+                disabled={processedData.filter((d) => !d.hasError).length === 0}
+              >
+                <svg
+                  className="download-icon"
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"
+                  />
+                </svg>
+                Export InValid Data
+              </button>
               <div className="counts-horizontal">
                 <div className="count-box total">
                   <span className="count-label">Total:</span>
                   <span className="count-value">
-                    {data.length.toLocaleString("en-IN")}
+                    {processedData.length.toLocaleString("en-IN")}
                   </span>
                 </div>
 
                 <div className="count-box valid">
                   <span className="count-label">Valid:</span>
                   <span className="count-value">
-                    {data
+                    {processedData
                       .filter((d) => !d.hasError)
                       .length.toLocaleString("en-IN")}
                   </span>
@@ -161,7 +215,7 @@ export default function CreateTableForContactUpload() {
                 <div className="count-box error">
                   <span className="count-label">Errors:</span>
                   <span className="count-value">
-                    {data
+                    {processedData
                       .filter((d) => d.hasError)
                       .length.toLocaleString("en-IN")}
                   </span>
@@ -217,7 +271,7 @@ export default function CreateTableForContactUpload() {
                       {isEditing ? (
                         <>
                           <button
-                            onClick={() => handleSave(absoluteIndex)}
+                            onClick={() => handleSave(index)}
                             className="save-btn"
                           >
                             Save
@@ -228,7 +282,7 @@ export default function CreateTableForContactUpload() {
                         </>
                       ) : (
                         <button
-                          onClick={() => handleEdit(absoluteIndex)}
+                          onClick={() => handleEdit(index)}
                           className="edit-btn"
                         >
                           Edit
