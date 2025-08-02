@@ -3,13 +3,19 @@ import * as XLSX from "xlsx";
 import { useLocation } from "react-router-dom";
 import "./CreateTableForContactUpload.css";
 import { validateRow, VISIBLE_HEADERS } from "../utils/dataValidation";
+import { useSelector, useDispatch } from "react-redux";
+import { setExcelData, updateRow } from "../slices/excelSlice";
 
 export default function CreateTableForContactUpload() {
+  // Get the uploaded file from navigation state
   const location = useLocation();
   const file = location.state?.file;
 
-  const [data, setData] = useState([]);
-  const [originalData, setOriginalData] = useState([]);
+  // Redux state for Excel data
+  const dispatch = useDispatch();
+  const data = useSelector((state) => state.excel.data);
+
+  // Local state for UI only
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [editingRow, setEditingRow] = useState(null);
@@ -17,9 +23,9 @@ export default function CreateTableForContactUpload() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dataFilter, setDataFilter] = useState("all");
 
+  // Parse and validate Excel file, then store in Redux
   useEffect(() => {
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       const binaryStr = e.target.result;
@@ -28,24 +34,19 @@ export default function CreateTableForContactUpload() {
       const worksheet = workbook.Sheets[firstSheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
       const validatedData = jsonData.map(validateRow);
-      setData(validatedData);
-      setOriginalData(validatedData);
+      dispatch(setExcelData(validatedData));
     };
     reader.readAsBinaryString(file);
-  }, [file]);
+  }, [file, dispatch]);
 
-  // Memoized filtered and searched data (no sorting)
+  // Memoized: Filter and search data for display (no sorting)
   const processedData = useMemo(() => {
     let result = [...data];
-
-    // Apply filter
     if (dataFilter === "valid") {
       result = result.filter((row) => !row.hasError);
     } else if (dataFilter === "invalid") {
       result = result.filter((row) => row.hasError);
     }
-
-    // Apply search
     if (searchTerm) {
       result = result.filter((row) =>
         VISIBLE_HEADERS.some((key) =>
@@ -53,45 +54,48 @@ export default function CreateTableForContactUpload() {
         )
       );
     }
-
     return result;
   }, [data, dataFilter, searchTerm]);
 
+  // Change filter (all/valid/invalid)
   const handleFilterChange = (filterType) => {
     setDataFilter(filterType);
     setCurrentPage(1);
   };
 
+  // Start editing a row
   const handleEdit = (rowIndex) => {
     setEditingRow(rowIndex);
     setEditData({ ...processedData[rowIndex] });
   };
 
+  // Handle input change in edit mode
   const handleEditChange = (key, value) => {
     setEditData((prev) => ({ ...prev, [key]: value }));
   };
 
+  // Save edited row using Redux
   const handleSave = (rowIndex) => {
     const validatedRow = validateRow(editData);
-    const newData = [...data];
-    // Find the absolute index in the original data
     const absoluteIndex = (currentPage - 1) * rowsPerPage + rowIndex;
-    newData[absoluteIndex] = validatedRow;
-    setData(newData);
+    dispatch(updateRow({ index: absoluteIndex, row: validatedRow }));
     setEditingRow(null);
     setEditData({});
   };
 
+  // Cancel editing
   const handleCancel = () => {
     setEditingRow(null);
     setEditData({});
   };
 
+  // Handle search input change
   const handleSearch = (e) => {
     setSearchTerm(e.target.value.toLowerCase());
-    setCurrentPage(1); // reset to first page on new search
+    setCurrentPage(1);
   };
 
+  // Export valid data to Excel
   const handleExportValidData = () => {
     const validData = processedData.filter((row) => !row.hasError);
     const worksheet = XLSX.utils.json_to_sheet(validData);
@@ -100,6 +104,7 @@ export default function CreateTableForContactUpload() {
     XLSX.writeFile(workbook, "valid_contacts.xlsx");
   };
 
+  // Export invalid data to Excel
   const handleExportInValidData = () => {
     const invalidData = processedData.filter((row) => row.hasError);
     const worksheet = XLSX.utils.json_to_sheet(invalidData);
@@ -116,22 +121,25 @@ export default function CreateTableForContactUpload() {
     );
   }
 
-  // Pagination logic
+  // Pagination calculations
   const totalEntries = processedData.length;
   const totalPages = Math.ceil(totalEntries / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = Math.min(startIndex + rowsPerPage, totalEntries);
   const paginatedData = processedData.slice(startIndex, endIndex);
 
+  // Change rows per page
   const handleRowsChange = (e) => {
     setRowsPerPage(Number(e.target.value));
     setCurrentPage(1);
   };
 
+  // Go to a specific page
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
+  // Get visible page numbers for pagination
   const getPageNumbers = () => {
     const maxVisible = 5;
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
@@ -142,12 +150,15 @@ export default function CreateTableForContactUpload() {
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
+  // Render the component
   return (
     <div className="table-container">
       {data.length > 0 ? (
         <>
+          {/* Header: Search, Export, and Counts */}
           <div className="table-header">
             <div className="search-container">
+              {/* Search input for filtering contacts */}
               <span className="search-icon">🔍</span>
               <input
                 type="text"
@@ -158,6 +169,7 @@ export default function CreateTableForContactUpload() {
               />
             </div>
             <div className="header-actions-right">
+              {/* Export valid data button */}
               <button
                 onClick={handleExportValidData}
                 className="export-btn"
@@ -176,7 +188,7 @@ export default function CreateTableForContactUpload() {
                 </svg>
                 Export Valid Data
               </button>
-
+              {/* Export invalid data button */}
               <button
                 onClick={handleExportInValidData}
                 className="export-btn"
@@ -195,6 +207,7 @@ export default function CreateTableForContactUpload() {
                 </svg>
                 Export InValid Data
               </button>
+              {/* Counts for total, valid, and error rows */}
               <div className="counts-horizontal">
                 <div className="count-box total">
                   <span className="count-label">Total:</span>
@@ -202,7 +215,6 @@ export default function CreateTableForContactUpload() {
                     {processedData.length.toLocaleString("en-IN")}
                   </span>
                 </div>
-
                 <div className="count-box valid">
                   <span className="count-label">Valid:</span>
                   <span className="count-value">
@@ -211,7 +223,6 @@ export default function CreateTableForContactUpload() {
                       .length.toLocaleString("en-IN")}
                   </span>
                 </div>
-
                 <div className="count-box error">
                   <span className="count-label">Errors:</span>
                   <span className="count-value">
@@ -224,6 +235,7 @@ export default function CreateTableForContactUpload() {
             </div>
           </div>
 
+          {/* Data Table */}
           <table className="contact-upload-table">
             <thead>
               <tr>
@@ -270,6 +282,7 @@ export default function CreateTableForContactUpload() {
                     <td>
                       {isEditing ? (
                         <>
+                          {/* Save and Cancel buttons for editing */}
                           <button
                             onClick={() => handleSave(index)}
                             className="save-btn"
@@ -281,6 +294,7 @@ export default function CreateTableForContactUpload() {
                           </button>
                         </>
                       ) : (
+                        // Edit button
                         <button
                           onClick={() => handleEdit(index)}
                           className="edit-btn"
@@ -295,12 +309,13 @@ export default function CreateTableForContactUpload() {
             </tbody>
           </table>
 
+          {/* Pagination Controls */}
           <div className="pagination-ui">
             <div className="entries-control">
               <label>
                 Show&nbsp;
                 <select value={rowsPerPage} onChange={handleRowsChange}>
-                  {[10, 25, 50, 100].map((num) => (
+                  {[10, 25, 50, 100,].map((num) => (
                     <option key={num} value={num}>
                       {num}
                     </option>

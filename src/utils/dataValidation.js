@@ -1,5 +1,5 @@
 
-export const VISIBLE_HEADERS=["Name", "Email", "PhoneNo","Notes", "Address"];
+export const VISIBLE_HEADERS=["Name", "Email", "GST Number","Country","PhoneNo","Notes", "Address"];
 
 export const validateRow = (row) => {
   const errors = {};
@@ -11,6 +11,8 @@ export const validateRow = (row) => {
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.Email);
   const phoneValid = /^\d{10}$/.test(row.PhoneNo); // Exactly 10 digits
+  
+  
 
   // At least one of Email or PhoneNo must be valid
   if (!emailValid && !phoneValid) {
