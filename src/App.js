@@ -4,7 +4,6 @@ import ContactUpload from "./components/ContactUpload.js";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 
-
 function App() {
   return (
     <BrowserRouter>
