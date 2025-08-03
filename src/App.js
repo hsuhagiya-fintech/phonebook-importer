@@ -3,10 +3,6 @@ import FileUpload from "./components/ FileUpload.js";
 import ContactUpload from "./components/ContactUpload.js";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-// #edited
-// #modified to use BrowserRouter, Routes, and Route from react-router-dom
-
-// #new commit
 function App() {
   return (
     <BrowserRouter>
@@ -18,5 +14,7 @@ function App() {
     </BrowserRouter>
   );
 }
+
+// #export the fn
 
 export default App;
