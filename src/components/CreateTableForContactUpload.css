@@ -3,6 +3,7 @@
   padding: 12px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  background-color: #0d47a1;
 }
 
 /* Header Styles */
