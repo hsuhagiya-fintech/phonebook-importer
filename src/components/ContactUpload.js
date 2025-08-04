@@ -6,7 +6,6 @@ export default function ContactUpload() {
   const location = useLocation();
   const file = location.state?.file;
 
-  console.log("Received file:", file);
 
   return (
     <>
