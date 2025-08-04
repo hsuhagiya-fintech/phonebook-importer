@@ -40,22 +40,22 @@ export default function CreateTableForContactUpload() {
   }, [file, dispatch]);
 
   // Memoized: Filter and search data for display (no sorting)
-  // const processedData = useMemo(() => {
-  //   let result = [...data];
-  //   if (dataFilter === "valid") {
-  //     result = result.filter((row) => !row.hasError);
-  //   } else if (dataFilter === "invalid") {
-  //     result = result.filter((row) => row.hasError);
-  //   }
-  //   if (searchTerm) {
-  //     result = result.filter((row) =>
-  //       VISIBLE_HEADERS.some((key) =>
-  //         String(row[key]).toLowerCase().includes(searchTerm)
-  //       )
-  //     );
-  //   }
-  //   return result;
-  // }, [data, dataFilter, searchTerm]);
+  const processedData = useMemo(() => {
+    let result = [...data];
+    if (dataFilter === "valid") {
+      result = result.filter((row) => !row.hasError);
+    } else if (dataFilter === "invalid") {
+      result = result.filter((row) => row.hasError);
+    }
+    if (searchTerm) {
+      result = result.filter((row) =>
+        VISIBLE_HEADERS.some((key) =>
+          String(row[key]).toLowerCase().includes(searchTerm)
+        )
+      );
+    }
+    return result;
+  }, [data, dataFilter, searchTerm]);
 
   // Change filter (all/valid/invalid)
   const handleFilterChange = (filterType) => {
