@@ -11,7 +11,3 @@ root.render(
     <App />
   </Provider>
 );
-
-
-
-// /asfhshigvh
