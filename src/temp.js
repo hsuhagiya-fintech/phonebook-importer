@@ -96,21 +96,21 @@ export async function activate(context: ExtensionContext) {
 }
 
 
-// function registerMarkdownContentProvider(context: vscode.ExtensionContext) {
-//   const provider: vscode.TextDocumentContentProvider = {
-//     provideTextDocumentContent(uri: vscode.Uri): string {
-//       const key = uri.path.slice(1);
-//       return markdownContentStore.get(key) || "Content not found.";
-//     },
-//   };
+function registerMarkdownContentProvider(context: vscode.ExtensionContext) {
+  const provider: vscode.TextDocumentContentProvider = {
+    provideTextDocumentContent(uri: vscode.Uri): string {
+      const key = uri.path.slice(1);
+      return markdownContentStore.get(key) || "Content not found.";
+    },
+  };
 
-//   context.subscriptions.push(
-//     vscode.workspace.registerTextDocumentContentProvider(
-//       "markdown-preview",
-//       provider
-//     )
-//   );
-// }
+  context.subscriptions.push(
+    vscode.workspace.registerTextDocumentContentProvider(
+      "markdown-preview",
+      provider
+    )
+  );
+}
 
 // // export function registerPreviewCommand(context: vscode.ExtensionContext) {
 // //   context.subscriptions.push(
