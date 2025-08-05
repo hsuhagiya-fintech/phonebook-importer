@@ -11,6 +11,3 @@ root.render(
     <App />
   </Provider>
 );
-// hgvgv 
-// jfkejfegfek
-//hsjfsdhfi
