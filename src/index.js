@@ -11,10 +11,7 @@ root.render(
     <App />
   </Provider>
 );
-//modifyt
-// gfbusgufg
 
-//hfjishgfeih
 
 
 // /asfhshigvh
