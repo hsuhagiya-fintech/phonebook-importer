@@ -1310,3 +1310,32 @@ try {
 
 //
   //testing....
+
+
+  
+  ///aknjwbshf
+  //testing commit
+
+  //   const res = await analyzeCommittedChanges1(latestCommit, op);
+  //   op.appendLine(
+  //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+  //   );
+  // } catch (err: any) {
+  //   op.appendLine(
+  //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+  //   );
+  // }
+
+  ///aknjwbshf
+  //testing commit
+
+
+  //sdfjkhdsjfherhfiu
+
+//
+  //testing....
+
+  //sdfjkhdsjfherhfiu
+
+
+  //testing....
