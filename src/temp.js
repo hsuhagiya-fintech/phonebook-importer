@@ -46,12 +46,12 @@
 
 // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
 
-// try {
-//   const res = await analyzeUncommittedChanges1(op);
-//   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
-// } catch (err: any) {
-//   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
-// }
+try {
+  const res = await analyzeUncommittedChanges1(op);
+  op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+} catch (err: any) {
+  op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+}
 
 //   // const { execSync } = require("child_process");
 
