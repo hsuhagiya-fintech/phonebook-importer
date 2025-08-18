@@ -468,24 +468,24 @@ try {
   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
 }
 
-  // const { execSync } = require("child_process");
+  const { execSync } = require("child_process");
 
-  // try {
-  //   const latestCommit = execSync("git rev-parse HEAD", {
-  //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
-  //   })
-  //     .toString()
-  //     .trim();
+  try {
+    const latestCommit = execSync("git rev-parse HEAD", {
+      cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+    })
+      .toString()
+      .trim();
 
-  //   const res = await analyzeCommittedChanges1(latestCommit, op);
-  //   op.appendLine(
-  //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
-  //   );
-  // } catch (err: any) {
-  //   op.appendLine(
-  //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
-  //   );
-  // }
+    const res = await analyzeCommittedChanges1(latestCommit, op);
+    op.appendLine(
+      `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+    );
+  } catch (err: any) {
+    op.appendLine(
+      `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+    );
+  }
 
 
   import "./ContactUpload.css";
