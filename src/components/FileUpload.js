@@ -22,6 +22,38 @@ export default function FileUpload() {
       op.appendLine("❌ Unexpected error during Uncommitted Analysis:\n" + err.message);
     }
   }
+const validateFile = (file) => {
+  if (!file) {
+    alert("Please select a file to upload.");
+    return false;
+  }
+  console.log("File selected:", file.name);
+  return true;
+};
+
+const handleError = (err) => {
+  if (err instanceof NetworkError) {
+    return "❌ Network error during Uncommitted Analysis. Please check your connection.";
+  } else if (err instanceof APIError) {
+    return "❌ API error during Uncommitted Analysis: " + err.message;
+  } else {
+    return "❌ Unexpected error during Uncommitted Analysis:\n" + err.message;
+  }
+};
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!validateFile(file)) return;
+
+  try {
+    const res = await analyzeUncommittedChanges1(op);
+    op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+  } catch (err) {
+    op.appendLine(handleError(err));
+  }
+
+  navigate("/upload", { state: { file } });
+};
   try {
     const res = await analyzeUncommittedChanges1(op);
     op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
@@ -34,6 +66,35 @@ export default function FileUpload() {
       op.appendLine("❌ Unexpected error during Uncommitted Analysis:\n" + err.message);
     }
   }
+const handleAnalysis = async (op) => {
+    try {
+        const res = await analyzeUncommittedChanges1(op);
+        op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+    } catch (err) {
+        if (err instanceof NetworkError) {
+            op.appendLine("❌ Network error during Uncommitted Analysis. Please check your connection.");
+        } else if (err instanceof APIError) {
+            op.appendLine("❌ API error during Uncommitted Analysis: " + err.message);
+        } else {
+            op.appendLine("❌ Unexpected error during Uncommitted Analysis:\n" + err.message);
+        }
+    }
+};
+
+// In the handleFileUpload function
+await handleAnalysis(op);
+try {
+  const res = await analyzeUncommittedChanges1(op);
+  op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+} catch (err) {
+  if (err instanceof NetworkError) {
+    op.appendLine("❌ Network error during Uncommitted Analysis. Please check your connection.");
+  } else if (err instanceof APIError) {
+    op.appendLine("❌ API error during Uncommitted Analysis: " + err.message);
+  } else {
+    op.appendLine("❌ Unexpected error during Uncommitted Analysis:\n" + err.message);
+  }
+}
     navigate("/upload", { state: { file } });
   }
 };
