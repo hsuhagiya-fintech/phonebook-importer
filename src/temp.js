@@ -129,6 +129,7 @@ import {
 
 // Load the .env file
 dotenv.config({ path: path.join(__dirname, "../.env") });
+}
 import { registerWebViewProvider } from "./panels/SidePanel";
 import { getAppInsightsInstance } from "./logging/AppInsights";
 import { getRepositories } from "./vscode-extensionapi";
@@ -213,6 +214,7 @@ try {
   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
 } catch (err: any) {
   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+}
 }
 
   // const { execSync } = require("child_process");
