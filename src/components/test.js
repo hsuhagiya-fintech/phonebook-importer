@@ -27,7 +27,57 @@ interface CommitAnalysisProps {
 
 
 // This will store all issues across files (accumulator across renders)
+// 🔍 ISSUE: RES-100 - High Severity
+// Lines 30-30
+// The accumulation of issues in `allFilesWithIssues` creates potential memory overhead as the code executes multiple times, especially if there are many files being analyzed. This unbounded growth of data could lead to excessive memory consumption over time.
 const allFilesWithIssues: Record<string, any[]> = {};
+// ✅ SOLUTION: RES-100
+// Instead of maintaining a global mutable object to accumulate issues across renders, it would be more efficient to send issues immediately after processing a file. This can help in reducing the memory footprint and avoids retaining large data structures that may not be necessary. Additionally, encapsulating the accumulation logic within a useEffect that clears this accumulator after sending could also help manage memory better.
+const CommitAnalysis: React.FC<CommitAnalysisProps> = ({
+  commitAnalysis
+}) => {
+  const sentFilesRef = useRef<Set<string>>(new Set());
+  const sentCompletedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (!commitAnalysis?.data || commitAnalysis.data.length === 0) return;
+    
+    const allFilesWithIssues = {}; // Local accumulation for the current run
+
+    commitAnalysis.data.forEach((file: any) => {
+      const fileName = file?.file_name || "Unknown";
+      if (sentFilesRef.current.has(fileName)) return;
+
+      const issues: any[] = [];
+      file?.analysis?.forEach((analysisItem: any) => {
+        analysisItem?.issue_items?.forEach((issue: any) => {
+          issues.push(issue);
+        });
+      });
+
+      if (issues.length > 0) {
+        allFilesWithIssues[fileName] = issues; // Local accumulation
+
+        postMessage({
+          command: "commitAnalysisFile",
+          file_name: fileName,
+          issues,
+        });
+        sentFilesRef.current.add(fileName);
+      }
+    });
+
+    // Check for completion after processing
+    const hasIssues = Object.keys(allFilesWithIssues).length > 0;
+    if (!commitAnalysis?.running && hasIssues) {
+      console.log("✅ All files processed, final issues:", allFilesWithIssues);
+      postMessage({
+        command: "commitAnalysisCompleted",
+        issues: allFilesWithIssues,
+      });
+      sentCompletedRef.current = true;
+    }
+  }, [commitAnalysis?.data, commitAnalysis?.running]);
 
 const CommitAnalysis: React.FC<CommitAnalysisProps> = ({
   commitAnalysis
@@ -71,33 +121,37 @@ const CommitAnalysis: React.FC<CommitAnalysisProps> = ({
   useEffect(() => {
     if (!commitAnalysis?.data || commitAnalysis.data.length === 0) return;
 
-    commitAnalysis.data.forEach((file: any) => {
-      const fileName = file?.file_name || "Unknown";
-      if (sentFilesRef.current.has(fileName)) return;
+commitAnalysis.data.forEach((file: any) => {
+  try {
+    const fileName = file?.file_name || "Unknown";
+    if (sentFilesRef.current.has(fileName)) return;
 
-      const issues: any[] = [];
-      file?.analysis?.forEach((analysisItem: any) => {
-        analysisItem?.issue_items?.forEach((issue: any) => {
-          issues.push(issue);
-        });
+    const issues: any[] = [];
+    file?.analysis?.forEach((analysisItem: any) => {
+      analysisItem?.issue_items?.forEach((issue: any) => {
+        issues.push(issue);
       });
-
-      // Accumulate
-      if (issues.length > 0) {
-        allFilesWithIssues[fileName] = [
-          ...(allFilesWithIssues[fileName] || []),
-          ...issues,
-        ];
-
-        // Send once per file
-        postMessage({
-          command: "commitAnalysisFile",
-          file_name: fileName,
-          issues,
-        });
-        sentFilesRef.current.add(fileName);
-      }
     });
+
+    // Accumulate
+    if (issues.length > 0) {
+      allFilesWithIssues[fileName] = [
+        ...(allFilesWithIssues[fileName] || []),
+        ...issues,
+      ];
+
+      // Send once per file
+      postMessage({
+        command: "commitAnalysisFile",
+        file_name: fileName,
+        issues,
+      });
+      sentFilesRef.current.add(fileName);
+    }
+  } catch (error) {
+    console.error(`Error processing file ${file?.file_name}:`, error);
+  }
+});
   }, [commitAnalysis?.data]);
 
   // Detect completion
