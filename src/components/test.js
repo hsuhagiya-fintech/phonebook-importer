@@ -27,12 +27,6 @@ interface CommitAnalysisProps {
 
 
 // This will store all issues across files (accumulator across renders)
-// 🔍 ISSUE: RES-100 - High Severity
-// Lines 30-30
-// The accumulation of issues in `allFilesWithIssues` creates potential memory overhead as the code executes multiple times, especially if there are many files being analyzed. This unbounded growth of data could lead to excessive memory consumption over time.
-const allFilesWithIssues: Record<string, any[]> = {};
-// ✅ SOLUTION: RES-100
-// Instead of maintaining a global mutable object to accumulate issues across renders, it would be more efficient to send issues immediately after processing a file. This can help in reducing the memory footprint and avoids retaining large data structures that may not be necessary. Additionally, encapsulating the accumulation logic within a useEffect that clears this accumulator after sending could also help manage memory better.
 const CommitAnalysis: React.FC<CommitAnalysisProps> = ({
   commitAnalysis
 }) => {
