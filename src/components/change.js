@@ -75,10 +75,16 @@ export class SimpleEventEmitter {
     const i = list.indexOf(handler);
     if (i >= 0) list.splice(i, 1);
   }
-  emit(evt, ...args) {
+emit(evt, ...args) {
     const list = this.map.get(evt) || [];
-    for (const fn of list) try { fn(...args); } catch (_) {}
-  }
+    for (const fn of list) {
+        try { 
+            fn(...args); 
+        } catch (error) {
+            console.error(`Error in event handler for event '${evt}':`, error);
+        }
+    }
+}
 }
 interface GitInfo {
   organization: string;
