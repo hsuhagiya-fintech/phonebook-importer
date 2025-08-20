@@ -3,46 +3,46 @@
 // Generated for exact line count as requested.
 'use strict';
 
-// ---- Common Utilities ----
-export const isNil = (v) => v === null || v === undefined;
-export const isStr = (v) => typeof v === 'string';
-export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-export const debounce = (fn, wait = 200) => {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), wait);
-  };
-};
-export const throttle = (fn, wait = 200) => {
-  let last = 0;
-  return (...args) => {
-    const now = Date.now();
-    if (now - last >= wait) {
-      last = now;
-      return fn(...args);
-    }
-  };
-};
+// // ---- Common Utilities ----
+// export const isNil = (v) => v === null || v === undefined;
+// export const isStr = (v) => typeof v === 'string';
+// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
+// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
+// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+// export const debounce = (fn, wait = 200) => {
+//   let t;
+//   return (...args) => {
+//     clearTimeout(t);
+//     t = setTimeout(() => fn(...args), wait);
+//   };
+// };
+// export const throttle = (fn, wait = 200) => {
+//   let last = 0;
+//   return (...args) => {
+//     const now = Date.now();
+//     if (now - last >= wait) {
+//       last = now;
+//       return fn(...args);
+//     }
+//   };
+// };
 
-// ---- Logger ----
-export class Logger {
-  constructor(scope = 'app', level = 'info') { // Accept level as a parameter
-    this.scope = scope;
-    this.level = level; // Injected log level
-  }
-  fmt(level, msg) {
-    const ts = new Date().toISOString();
-    return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-  }
-  info(msg) { console.log(this.fmt('info', msg)); }
-  warn(msg) { console.warn(this.fmt('warn', msg)); }
-  error(msg) { console.error(this.fmt('error', msg)); }
-  debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-}
-    this.level = 'info';
+// // ---- Logger ----
+// export class Logger {
+//   constructor(scope = 'app', level = 'info') { // Accept level as a parameter
+//     this.scope = scope;
+//     this.level = level; // Injected log level
+//   }
+//   fmt(level, msg) {
+//     const ts = new Date().toISOString();
+//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
+//   }
+//   info(msg) { console.log(this.fmt('info', msg)); }
+//   warn(msg) { console.warn(this.fmt('warn', msg)); }
+//   error(msg) { console.error(this.fmt('error', msg)); }
+//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
+// }
+//     this.level = 'info';
   }
   fmt(level, msg) {
     const ts = new Date().toISOString();
