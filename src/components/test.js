@@ -50,11 +50,22 @@
 //   type AnalysisPayload,
 //   analyzeCommittedChanges,
 //   analyzeCommittedChanges1,
-// } from "./vscode-extensionapi";
-
-// // Load the .env file
-// dotenv.config({ path: path.join(__dirname, "../.env") });
-// import { registerWebViewProvider } from "./panels/SidePanel";
+try {
+  const res = await analyzeUncommittedChanges1(op);
+  op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+} catch (err: any) {
+  const errorMsg = err?.message || "Unknown error occurred during uncommitted analysis.";
+  op.appendLine("❌ Error during Uncommitted Analysis:\n" + errorMsg);
+  
+  // Logging additional context for debugging
+  console.error(`Error Type: ${err?.name}, Message: ${errorMsg}, Stack: ${err?.stack}`);
+  
+  // Notify the user about the issue
+  vscode.window.showErrorMessage("An error occurred while analyzing uncommitted changes. Please see the output log for details.");
+  
+  // Optionally, retry the operation
+  // await retryAnalyzeUncommittedChanges();
+}
 // import { getAppInsightsInstance } from "./logging/AppInsights";
 // import { getRepositories } from "./vscode-extensionapi";
 // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
