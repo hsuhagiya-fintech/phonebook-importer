@@ -1,47 +1,1767 @@
-class SimpleEventEmitter {
-    constructor(maxHandlers = 10) {
-        this.map = new Map();
-        this.maxHandlers = maxHandlers;
-    }
-    
-    on(evt, handler) {
-        const list = this.map.get(evt) || [];
-        if (list.length >= this.maxHandlers) {
-            console.warn(`Warning: Attempting to add a new handler for '${evt}' exceeding the limit of ${this.maxHandlers}.`);
-            return;  // Prevent adding the new handler
-        }
-        list.push(handler);
-        this.map.set(evt, list);
-        return () => this.off(evt, handler);
-    }
-    
-    off(evt, handler) {
-        const list = this.map.get(evt) || [];
-        const i = list.indexOf(handler);
-        if (i >= 0) list.splice(i, 1);
-        if (list.length === 0) {
-            this.map.delete(evt);  // Remove empty lists
-        }
-    }
+// import "./ContactUpload.css";
+// import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// import { useNavigate,useLocation } from "react-router-dom";
+// export default function ContactUpload() {
+//   const navigate = useNavigate();
+const location = useLocation();
 
-    emit(evt, ...args) {
-        const list = this.map.get(evt) || [];
-        for (const fn of list) {
-            try { 
-                fn(...args); 
-            } catch (error) {
-                console.error(`Error in event handler for event '${evt}':`, error);
-            }
-        }
-    }
+// Check if location.state exists and if it has the file property
+const file = location.state && location.state.file 
+              ? location.state.file 
+              : null; // Set to null or some sensible default
+
+// Proceed with file logic, ensuring it is not null or undefined
+if (file) {
+    // Logic for when file is available
+} else {
+    // Handle the case where file is not available (e.g., show an error message or fallback behavior)
 }
-emit(evt, ...args) {
-    const list = this.map.get(evt) || [];
-    for (const fn of list) {
-        try {
-            fn(...args);
-        } catch (error) {
-            console.error(`Error in event handler for event '${evt}':`, error);
-        }
-    }
+//   // const file = location.state?.file;
+
+
+//   return (
+//     <>
+//       <div className="header-container">
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           ← Back to Upload
+//         </button>
+
+//         <div className="header-title-group">
+//           <h1 className="header-title">Phonebook Data</h1>
+//           <p className="header-subtitle">Manage your imported contacts</p>
+//         </div>
+
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           New Upload
+//         </button>
+//       </div>
+
+//       <div>
+//         <CreateTableForContactUpload/>
+//       </div>
+//     </>
+//   );
+// }
+// import { ExtensionContext, window, Disposable } from "vscode";
+// import * as vscode from "vscode";
+// import * as dotenv from "dotenv";
+// import * as path from "path";
+// import {
+//   initializeGitWatching,
+//   waitForRepositories,
+//   setupRepositoryWatching,
+//   handleGitAction,
+//   showCommitAnalysisUI,
+//   getCommitAnalysisData,
+//   mapGitStatus,
+//   getFileContent,
+//   getPatchData,
+//   generateAlternativeDiff,
+//   generateEnhancedDiff,
+//   // sendToAnalysisPipeline,
+//   type AnalysisPayload,
+//   analyzeCommittedChanges,
+//   analyzeCommittedChanges1,
+// } from "./vscode-extensionapi";
+
+// // Load the .env file
+// dotenv.config({ path: path.join(__dirname, "../.env") });
+// import { registerWebViewProvider } from "./panels/SidePanel";
+// import { getAppInsightsInstance } from "./logging/AppInsights";
+// import { getRepositories } from "./vscode-extensionapi";
+// import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// const appInsights = getAppInsightsInstance();
+
+// let logoutCommand: Disposable | undefined;
+
+// const markdownContentStore = new Map<string, string>();
+
+// export async function activate(context: ExtensionContext) {
+//   vscode.window.showInformationMessage(" Activated..... ");
+//   const op = window.createOutputChannel("CodeSherlockAI");
+//   op.appendLine("Extension is Activated ..... ");
+
+//   registerWebViewProvider(context, op);
+//   registerMarkdownContentProvider(context);
+//   registerPreviewCommand(context);
+
+//   //added
+//   const machineId = vscode.env.machineId;
+
+//   // Check if the device ID has already been logged
+//   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+//   if (!hasLoggedDevice) {
+//     await context.globalState.update("hasLoggedDevice", true);
+//     // Log successful API call
+//     appInsights?.trackTrace({
+//       message: "User installed an CodeSherlock.ai extension",
+//       properties: { machineId, vs_code: true },
+//       severityLevel: 0,
+//     });
+//   }
+
+// //   const repos = await getRepositories();
+
+// //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+try {
+  const res = await analyzeUncommittedChanges1(op);
+  op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+} catch (err) {
+  if (err instanceof SpecificErrorType) {
+    op.appendLine("⚠️ Specific error occurred: " + err.message);
+  } else {
+    op.appendLine("❌ An unexpected error occurred during Uncommitted Analysis:\n" + (err.message || JSON.stringify(err)));
+  }
+  // Optional: Notify the user through a UI message if applicable
+  vscode.window.showErrorMessage("An error occurred during analysis. Please check the output for details.");
 }
+// }
+
+//   // const { execSync } = require("child_process");
+
+//   // try {
+//   //   const latestCommit = execSync("git rev-parse HEAD", {
+//   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//   //   })
+//   //     .toString()
+//   //     .trim();
+
+//   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//   //   op.appendLine(
+//   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//   //   );
+//   // } catch (err: any) {
+//   //   op.appendLine(
+//   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//   //   );
+//   // }
+
+
+//   import "./ContactUpload.css";
+// import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// import { useNavigate,useLocation } from "react-router-dom";
+// export default function ContactUpload() {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   // const file = location.state?.file;
+
+
+//   return (
+//     <>
+//       <div className="header-container">
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           ← Back to Upload
+//         </button>
+
+//         <div className="header-title-group">
+//           <h1 className="header-title">Phonebook Data</h1>
+//           <p className="header-subtitle">Manage your imported contacts</p>
+//         </div>
+
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           New Upload
+//         </button>
+//       </div>
+
+//       <div>
+//         <CreateTableForContactUpload/>
+//       </div>
+//     </>
+//   );
+// }
+// import { ExtensionContext, window, Disposable } from "vscode";
+// import * as vscode from "vscode";
+// import * as dotenv from "dotenv";
+// import * as path from "path";
+// import {
+//   initializeGitWatching,
+//   waitForRepositories,
+//   setupRepositoryWatching,
+//   handleGitAction,
+//   showCommitAnalysisUI,
+//   getCommitAnalysisData,
+//   mapGitStatus,
+//   getFileContent,
+//   getPatchData,
+//   generateAlternativeDiff,
+//   generateEnhancedDiff,
+//   // sendToAnalysisPipeline,
+//   type AnalysisPayload,
+//   analyzeCommittedChanges,
+//   analyzeCommittedChanges1,
+// } from "./vscode-extensionapi";
+
+// // Load the .env file
+// dotenv.config({ path: path.join(__dirname, "../.env") });
+// import { registerWebViewProvider } from "./panels/SidePanel";
+// import { getAppInsightsInstance } from "./logging/AppInsights";
+// import { getRepositories } from "./vscode-extensionapi";
+// import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// const appInsights = getAppInsightsInstance();
+
+// let logoutCommand: Disposable | undefined;
+
+// const markdownContentStore = new Map<string, string>();
+
+// export async function activate(context: ExtensionContext) {
+//   vscode.window.showInformationMessage(" Activated..... ");
+//   const op = window.createOutputChannel("CodeSherlockAI");
+//   op.appendLine("Extension is Activated ..... ");
+
+//   registerWebViewProvider(context, op);
+//   registerMarkdownContentProvider(context);
+//   registerPreviewCommand(context);
+
+//   //added
+//   const machineId = vscode.env.machineId;
+
+//   // Check if the device ID has already been logged
+//   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+//   if (!hasLoggedDevice) {
+//     await context.globalState.update("hasLoggedDevice", true);
+//     // Log successful API call
+//     appInsights?.trackTrace({
+//       message: "User installed an CodeSherlock.ai extension",
+//       properties: { machineId, vs_code: true },
+//       severityLevel: 0,
+//     });
+//   }
+
+// //   const repos = await getRepositories();
+
+// //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// try {
+//   const res = await analyzeUncommittedChanges1(op);
+//   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// } catch (err: any) {
+//   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// }
+
+//   // const { execSync } = require("child_process");
+
+//   // try {
+//   //   const latestCommit = execSync("git rev-parse HEAD", {
+//   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//   //   })
+//   //     .toString()
+//   //     .trim();
+
+//   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//   //   op.appendLine(
+//   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//   //   );
+//   // } catch (err: any) {
+//   //   op.appendLine(
+//   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//   //   );
+//   // }
+
+//   ///aknjwbshf
+//   //testing commit
+
+
+//   //sdfjkhdsjfherhfiu
+
+
+
+
+
+//   import "./ContactUpload.css";
+//   import CreateTableForContactUpload from "./CreateTableForContactUpload";
+//   import { useNavigate,useLocation } from "react-router-dom";
+//   export default function ContactUpload() {
+//     const navigate = useNavigate();
+//     const location = useLocation();
+//     // const file = location.state?.file;
+  
+  
+//     return (
+//       <>
+//         <div className="header-container">
+//           <button className="header-button" onClick={() => navigate("/")}>
+//             ← Back to Upload
+//           </button>
+  
+//           <div className="header-title-group">
+//             <h1 className="header-title">Phonebook Data</h1>
+//             <p className="header-subtitle">Manage your imported contacts</p>
+//           </div>
+  
+//           <button className="header-button" onClick={() => navigate("/")}>
+//             New Upload
+//           </button>
+//         </div>
+  
+//         <div>
+//           <CreateTableForContactUpload/>
+//         </div>
+//       </>
+//     );
+//   }
+//   import { ExtensionContext, window, Disposable } from "vscode";
+//   import * as vscode from "vscode";
+//   import * as dotenv from "dotenv";
+//   import * as path from "path";
+//   import {
+//     initializeGitWatching,
+//     waitForRepositories,
+//     setupRepositoryWatching,
+//     handleGitAction,
+//     showCommitAnalysisUI,
+//     getCommitAnalysisData,
+//     mapGitStatus,
+//     getFileContent,
+//     getPatchData,
+//     generateAlternativeDiff,
+//     generateEnhancedDiff,
+//     // sendToAnalysisPipeline,
+//     type AnalysisPayload,
+//     analyzeCommittedChanges,
+//     analyzeCommittedChanges1,
+//   } from "./vscode-extensionapi";
+  
+//   // Load the .env file
+//   dotenv.config({ path: path.join(__dirname, "../.env") });
+//   import { registerWebViewProvider } from "./panels/SidePanel";
+//   import { getAppInsightsInstance } from "./logging/AppInsights";
+//   import { getRepositories } from "./vscode-extensionapi";
+//   import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+  
+//   const appInsights = getAppInsightsInstance();
+  
+//   let logoutCommand: Disposable | undefined;
+  
+//   const markdownContentStore = new Map<string, string>();
+  
+//   export async function activate(context: ExtensionContext) {
+//     vscode.window.showInformationMessage(" Activated..... ");
+//     const op = window.createOutputChannel("CodeSherlockAI");
+//     op.appendLine("Extension is Activated ..... ");
+  
+//     registerWebViewProvider(context, op);
+//     registerMarkdownContentProvider(context);
+//     registerPreviewCommand(context);
+  
+//     //added
+//     const machineId = vscode.env.machineId;
+  
+//     // Check if the device ID has already been logged
+//     const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+  
+//     if (!hasLoggedDevice) {
+//       await context.globalState.update("hasLoggedDevice", true);
+//       // Log successful API call
+//       appInsights?.trackTrace({
+//         message: "User installed an CodeSherlock.ai extension",
+//         properties: { machineId, vs_code: true },
+//         severityLevel: 0,
+//       });
+//     }
+  
+//   //   const repos = await getRepositories();
+  
+//   //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+  
+//   try {
+//     const res = await analyzeUncommittedChanges1(op);
+//     op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+//   } catch (err: any) {
+//     op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+//   }
+  
+//     // const { execSync } = require("child_process");
+  
+//     // try {
+//     //   const latestCommit = execSync("git rev-parse HEAD", {
+//     //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//     //   })
+//     //     .toString()
+//     //     .trim();
+  
+//     //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//     //   op.appendLine(
+//     //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//     //   );
+//     // } catch (err: any) {
+//     //   op.appendLine(
+//     //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//     //   );
+//     // }
+
+
+//     import "./ContactUpload.css";
+//     import CreateTableForContactUpload from "./CreateTableForContactUpload";
+//     import { useNavigate,useLocation } from "react-router-dom";
+//     export default function ContactUpload() {
+//       const navigate = useNavigate();
+//       const location = useLocation();
+//       // const file = location.state?.file;
+    
+    
+//       return (
+//         <>
+//           <div className="header-container">
+//             <button className="header-button" onClick={() => navigate("/")}>
+//               ← Back to Upload
+//             </button>
+    
+//             <div className="header-title-group">
+//               <h1 className="header-title">Phonebook Data</h1>
+//               <p className="header-subtitle">Manage your imported contacts</p>
+//             </div>
+    
+//             <button className="header-button" onClick={() => navigate("/")}>
+//               New Upload
+//             </button>
+//           </div>
+    
+//           <div>
+//             <CreateTableForContactUpload/>
+//           </div>
+//         </>
+//       );
+//     }
+//     import { ExtensionContext, window, Disposable } from "vscode";
+//     import * as vscode from "vscode";
+//     import * as dotenv from "dotenv";
+//     import * as path from "path";
+//     import {
+//       initializeGitWatching,
+//       waitForRepositories,
+//       setupRepositoryWatching,
+//       handleGitAction,
+//       showCommitAnalysisUI,
+//       getCommitAnalysisData,
+//       mapGitStatus,
+//       getFileContent,
+//       getPatchData,
+//       generateAlternativeDiff,
+//       generateEnhancedDiff,
+//       // sendToAnalysisPipeline,
+//       type AnalysisPayload,
+//       analyzeCommittedChanges,
+//       analyzeCommittedChanges1,
+//     } from "./vscode-extensionapi";
+    
+//     // Load the .env file
+//     dotenv.config({ path: path.join(__dirname, "../.env") });
+//     import { registerWebViewProvider } from "./panels/SidePanel";
+//     import { getAppInsightsInstance } from "./logging/AppInsights";
+//     import { getRepositories } from "./vscode-extensionapi";
+//     import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+    
+//     const appInsights = getAppInsightsInstance();
+    
+//     let logoutCommand: Disposable | undefined;
+    
+//     const markdownContentStore = new Map<string, string>();
+    
+//     export async function activate(context: ExtensionContext) {
+//       vscode.window.showInformationMessage(" Activated..... ");
+//       const op = window.createOutputChannel("CodeSherlockAI");
+//       op.appendLine("Extension is Activated ..... ");
+    
+//       registerWebViewProvider(context, op);
+//       registerMarkdownContentProvider(context);
+//       registerPreviewCommand(context);
+    
+//       //added
+//       const machineId = vscode.env.machineId;
+    
+//       // Check if the device ID has already been logged
+//       const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+    
+//       if (!hasLoggedDevice) {
+//         await context.globalState.update("hasLoggedDevice", true);
+//         // Log successful API call
+//         appInsights?.trackTrace({
+//           message: "User installed an CodeSherlock.ai extension",
+//           properties: { machineId, vs_code: true },
+//           severityLevel: 0,
+//         });
+//       }
+    
+//     //   const repos = await getRepositories();
+    
+//     //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+    
+//     try {
+//       const res = await analyzeUncommittedChanges1(op);
+//       op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+//     } catch (err: any) {
+//       op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+//     }
+    
+//       // const { execSync } = require("child_process");
+    
+//       // try {
+//       //   const latestCommit = execSync("git rev-parse HEAD", {
+//       //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//       //   })
+//       //     .toString()
+//       //     .trim();
+    
+//       //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//       //   op.appendLine(
+//       //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//       //   );
+//       // } catch (err: any) {
+//       //   op.appendLine(
+//       //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//       //   );
+//       // }
+
+
+
+
+//       import React from "react";
+// import ReactDOM from "react-dom/client";
+// import App from "./App";
+// import { Provider } from "react-redux";
+// import { store } from "./store";
+
+// // Load the .env file
+// dotenv.config({ path: path.join(__dirname, "../.env") });
+// import { registerWebViewProvider } from "./panels/SidePanel";
+// import { getAppInsightsInstance } from "./logging/AppInsights";
+// import { getRepositories } from "./vscode-extensionapi";
+// import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// const appInsights = getAppInsightsInstance();
+
+// let logoutCommand: Disposable | undefined;
+
+// const markdownContentStore = new Map<string, string>();
+
+// export async function activate(context: ExtensionContext) {
+//   vscode.window.showInformationMessage(" Activated..... ");
+//   const op = window.createOutputChannel("CodeSherlockAI");
+//   op.appendLine("Extension is Activated ..... ");
+
+//   registerWebViewProvider(context, op);
+//   registerMarkdownContentProvider(context);
+//   registerPreviewCommand(context);
+
+//   //added
+//   const machineId = vscode.env.machineId;
+
+//   // Check if the device ID has already been logged
+//   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+//   if (!hasLoggedDevice) {
+//     await context.globalState.update("hasLoggedDevice", true);
+//     // Log successful API call
+//     appInsights?.trackTrace({
+//       message: "User installed an CodeSherlock.ai extension",
+//       properties: { machineId, vs_code: true },
+//       severityLevel: 0,
+//     });
+//   }
+
+
+
+// const repos = await getRepositories();
+
+// op.appendLine('Found Repository ...')
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+
+// //   import "./ContactUpload.css";
+// // import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// // import { useNavigate,useLocation } from "react-router-dom";
+// // export default function ContactUpload() {
+// //   const navigate = useNavigate();
+// //   const location = useLocation();
+// //   // const file = location.state?.file;
+
+
+// //   return (
+// //     <>
+// //       <div className="header-container">
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           ← Back to Upload
+// //         </button>
+
+// //         <div className="header-title-group">
+// //           <h1 className="header-title">Phonebook Data</h1>
+// //           <p className="header-subtitle">Manage your imported contacts</p>
+// //         </div>
+
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           New Upload
+// //         </button>
+// //       </div>
+
+// //       <div>
+// //         <CreateTableForContactUpload/>
+// //       </div>
+// //     </>
+// //   );
+// // }
+// // import { ExtensionContext, window, Disposable } from "vscode";
+// // import * as vscode from "vscode";
+// // import * as dotenv from "dotenv";
+// // import * as path from "path";
+// // import {
+// //   initializeGitWatching,
+// //   waitForRepositories,
+// //   setupRepositoryWatching,
+// //   handleGitAction,
+// //   showCommitAnalysisUI,
+// //   getCommitAnalysisData,
+// //   mapGitStatus,
+// //   getFileContent,
+// //   getPatchData,
+// //   generateAlternativeDiff,
+// //   generateEnhancedDiff,
+// //   // sendToAnalysisPipeline,
+// //   type AnalysisPayload,
+// //   analyzeCommittedChanges,
+// //   analyzeCommittedChanges1,
+// // } from "./vscode-extensionapi";
+
+// // // Load the .env file
+// // dotenv.config({ path: path.join(__dirname, "../.env") });
+// // import { registerWebViewProvider } from "./panels/SidePanel";
+// // import { getAppInsightsInstance } from "./logging/AppInsights";
+// // import { getRepositories } from "./vscode-extensionapi";
+// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// // const appInsights = getAppInsightsInstance();
+
+// // let logoutCommand: Disposable | undefined;
+
+// // const markdownContentStore = new Map<string, string>();
+
+// // export async function activate(context: ExtensionContext) {
+// //   vscode.window.showInformationMessage(" Activated..... ");
+// //   const op = window.createOutputChannel("CodeSherlockAI");
+// //   op.appendLine("Extension is Activated ..... ");
+
+// //   registerWebViewProvider(context, op);
+// //   registerMarkdownContentProvider(context);
+// //   registerPreviewCommand(context);
+
+// //   //added
+// //   const machineId = vscode.env.machineId;
+
+// //   // Check if the device ID has already been logged
+// //   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+// //   if (!hasLoggedDevice) {
+// //     await context.globalState.update("hasLoggedDevice", true);
+// //     // Log successful API call
+// //     appInsights?.trackTrace({
+// //       message: "User installed an CodeSherlock.ai extension",
+// //       properties: { machineId, vs_code: true },
+// //       severityLevel: 0,
+// //     });
+// //   }
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+// //   ///aknjwbshf
+// //   //testing commit
+
+
+// //   //sdfjkhdsjfherhfiu
+
+
+// //   //testing....
+// // //
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+
+// //   import "./ContactUpload.css";
+// // import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// // import { useNavigate,useLocation } from "react-router-dom";
+// // export default function ContactUpload() {
+// //   const navigate = useNavigate();
+// //   const location = useLocation();
+// //   // const file = location.state?.file;
+
+
+// //   return (
+// //     <>
+// //       <div className="header-container">
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           ← Back to Upload
+// //         </button>
+
+// //         <div className="header-title-group">
+// //           <h1 className="header-title">Phonebook Data</h1>
+// //           <p className="header-subtitle">Manage your imported contacts</p>
+// //         </div>
+
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           New Upload
+// //         </button>
+// //       </div>
+
+// //       <div>
+// //         <CreateTableForContactUpload/>
+// //       </div>
+// //     </>
+// //   );
+// // }
+// // import { ExtensionContext, window, Disposable } from "vscode";
+// // import * as vscode from "vscode";
+// // import * as dotenv from "dotenv";
+// // import * as path from "path";
+// // import {
+// //   initializeGitWatching,
+// //   waitForRepositories,
+// //   setupRepositoryWatching,
+// //   handleGitAction,
+// //   showCommitAnalysisUI,
+// //   getCommitAnalysisData,
+// //   mapGitStatus,
+// //   getFileContent,
+// //   getPatchData,
+// //   generateAlternativeDiff,
+// //   generateEnhancedDiff,
+// //   // sendToAnalysisPipeline,
+// //   type AnalysisPayload,
+// //   analyzeCommittedChanges,
+// //   analyzeCommittedChanges1,
+// // } from "./vscode-extensionapi";
+
+// // // Load the .env file
+// // dotenv.config({ path: path.join(__dirname, "../.env") });
+// // import { registerWebViewProvider } from "./panels/SidePanel";
+// // import { getAppInsightsInstance } from "./logging/AppInsights";
+// // import { getRepositories } from "./vscode-extensionapi";
+// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// // const appInsights = getAppInsightsInstance();
+
+// // let logoutCommand: Disposable | undefined;
+
+// // const markdownContentStore = new Map<string, string>();
+
+// // export async function activate(context: ExtensionContext) {
+// //   vscode.window.showInformationMessage(" Activated..... ");
+// //   const op = window.createOutputChannel("CodeSherlockAI");
+// //   op.appendLine("Extension is Activated ..... ");
+
+// //   registerWebViewProvider(context, op);
+// //   registerMarkdownContentProvider(context);
+// //   registerPreviewCommand(context);
+
+// //   //added
+// //   const machineId = vscode.env.machineId;
+
+// //   // Check if the device ID has already been logged
+// //   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+// //   if (!hasLoggedDevice) {
+// //     await context.globalState.update("hasLoggedDevice", true);
+// //     // Log successful API call
+// //     appInsights?.trackTrace({
+// //       message: "User installed an CodeSherlock.ai extension",
+// //       properties: { machineId, vs_code: true },
+// //       severityLevel: 0,
+// //     });
+// //   }
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+// //   ///aknjwbshf
+// //   //testing commit
+
+
+// //   //sdfjkhdsjfherhfiu
+
+
+// //   //testing....
+
+
+// import "./ContactUpload.css";
+// import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// import { useNavigate,useLocation } from "react-router-dom";
+// export default function ContactUpload() {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   // const file = location.state?.file;
+
+
+//   return (
+//     <>
+//       <div className="header-container">
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           ← Back to Upload
+//         </button>
+
+//         <div className="header-title-group">
+//           <h1 className="header-title">Phonebook Data</h1>
+//           <p className="header-subtitle">Manage your imported contacts</p>
+//         </div>
+
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           New Upload
+//         </button>
+//       </div>
+
+//       <div>
+//         <CreateTableForContactUpload/>
+//       </div>
+//     </>
+//   );
+// }
+// import { ExtensionContext, window, Disposable } from "vscode";
+// import * as vscode from "vscode";
+// import * as dotenv from "dotenv";
+// import * as path from "path";
+// import {
+//   initializeGitWatching,
+//   waitForRepositories,
+//   setupRepositoryWatching,
+//   handleGitAction,
+//   showCommitAnalysisUI,
+//   getCommitAnalysisData,
+//   mapGitStatus,
+//   getFileContent,
+//   getPatchData,
+//   generateAlternativeDiff,
+//   generateEnhancedDiff,
+//   // sendToAnalysisPipeline,
+//   type AnalysisPayload,
+//   analyzeCommittedChanges,
+//   analyzeCommittedChanges1,
+// } from "./vscode-extensionapi";
+
+// // Load the .env file
+// dotenv.config({ path: path.join(__dirname, "../.env") });
+// import { registerWebViewProvider } from "./panels/SidePanel";
+// import { getAppInsightsInstance } from "./logging/AppInsights";
+// import { getRepositories } from "./vscode-extensionapi";
+// import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// const appInsights = getAppInsightsInstance();
+
+// let logoutCommand: Disposable | undefined;
+
+// const markdownContentStore = new Map<string, string>();
+
+// export async function activate(context: ExtensionContext) {
+//   vscode.window.showInformationMessage(" Activated..... ");
+//   const op = window.createOutputChannel("CodeSherlockAI");
+//   op.appendLine("Extension is Activated ..... ");
+
+//   registerWebViewProvider(context, op);
+//   registerMarkdownContentProvider(context);
+//   registerPreviewCommand(context);
+
+//   //added
+//   const machineId = vscode.env.machineId;
+
+//   // Check if the device ID has already been logged
+//   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+//   if (!hasLoggedDevice) {
+//     await context.globalState.update("hasLoggedDevice", true);
+//     // Log successful API call
+//     appInsights?.trackTrace({
+//       message: "User installed an CodeSherlock.ai extension",
+//       properties: { machineId, vs_code: true },
+//       severityLevel: 0,
+//     });
+//   }
+
+// //   const repos = await getRepositories();
+
+// //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// try {
+//   const res = await analyzeUncommittedChanges1(op);
+//   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// } catch (err: any) {
+//   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// }
+
+//   // const { execSync } = require("child_process");
+
+//   // try {
+//   //   const latestCommit = execSync("git rev-parse HEAD", {
+//   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//   //   })
+//   //     .toString()
+//   //     .trim();
+
+//   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//   //   op.appendLine(
+//   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//   //   );
+//   // } catch (err: any) {
+//   //   op.appendLine(
+//   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//   //   );
+//   // }
+
+
+//   import "./ContactUpload.css";
+// import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// import { useNavigate,useLocation } from "react-router-dom";
+// export default function ContactUpload() {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   // const file = location.state?.file;
+
+
+//   return (
+//     <>
+//       <div className="header-container">
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           ← Back to Upload
+//         </button>
+
+//         <div className="header-title-group">
+//           <h1 className="header-title">Phonebook Data</h1>
+//           <p className="header-subtitle">Manage your imported contacts</p>
+//         </div>
+
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           New Upload
+//         </button>
+//       </div>
+
+//       <div>
+//         <CreateTableForContactUpload/>
+//       </div>
+//     </>
+//   );
+// }
+// import { ExtensionContext, window, Disposable } from "vscode";
+// import * as vscode from "vscode";
+// import * as dotenv from "dotenv";
+// import * as path from "path";
+// import {
+//   initializeGitWatching,
+//   waitForRepositories,
+//   setupRepositoryWatching,
+//   handleGitAction,
+//   showCommitAnalysisUI,
+//   getCommitAnalysisData,
+//   mapGitStatus,
+//   getFileContent,
+//   getPatchData,
+//   generateAlternativeDiff,
+//   generateEnhancedDiff,
+//   // sendToAnalysisPipeline,
+//   type AnalysisPayload,
+//   analyzeCommittedChanges,
+//   analyzeCommittedChanges1,
+// } from "./vscode-extensionapi";
+
+// // Load the .env file
+// dotenv.config({ path: path.join(__dirname, "../.env") });
+// import { registerWebViewProvider } from "./panels/SidePanel";
+// import { getAppInsightsInstance } from "./logging/AppInsights";
+// import { getRepositories } from "./vscode-extensionapi";
+// import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// const appInsights = getAppInsightsInstance();
+
+// let logoutCommand: Disposable | undefined;
+
+// const markdownContentStore = new Map<string, string>();
+
+// export async function activate(context: ExtensionContext) {
+//   vscode.window.showInformationMessage(" Activated..... ");
+//   const op = window.createOutputChannel("CodeSherlockAI");
+//   op.appendLine("Extension is Activated ..... ");
+
+//   registerWebViewProvider(context, op);
+//   registerMarkdownContentProvider(context);
+//   registerPreviewCommand(context);
+
+//   //added
+//   const machineId = vscode.env.machineId;
+
+//   // Check if the device ID has already been logged
+//   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+//   if (!hasLoggedDevice) {
+//     await context.globalState.update("hasLoggedDevice", true);
+//     // Log successful API call
+//     appInsights?.trackTrace({
+//       message: "User installed an CodeSherlock.ai extension",
+//       properties: { machineId, vs_code: true },
+//       severityLevel: 0,
+//     });
+//   }
+
+// //   const repos = await getRepositories();
+
+// //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// try {
+//   const res = await analyzeUncommittedChanges1(op);
+//   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// } catch (err: any) {
+//   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// }
+
+//   // const { execSync } = require("child_process");
+
+//   // try {
+//   //   const latestCommit = execSync("git rev-parse HEAD", {
+//   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//   //   })
+//   //     .toString()
+//   //     .trim();
+
+//   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//   //   op.appendLine(
+//   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//   //   );
+//   // } catch (err: any) {
+//   //   op.appendLine(
+//   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//   //   );
+//   // }
+
+//   ///aknjwbshf
+//   //testing commit
+
+
+//   //sdfjkhdsjfherhfiu
+
+
+
+
+
+//   import "./ContactUpload.css";
+//   import CreateTableForContactUpload from "./CreateTableForContactUpload";
+//   import { useNavigate,useLocation } from "react-router-dom";
+//   export default function ContactUpload() {
+//     const navigate = useNavigate();
+//     const location = useLocation();
+//     // const file = location.state?.file;
+  
+  
+//     return (
+//       <>
+//         <div className="header-container">
+//           <button className="header-button" onClick={() => navigate("/")}>
+//             ← Back to Upload
+//           </button>
+  
+//           <div className="header-title-group">
+//             <h1 className="header-title">Phonebook Data</h1>
+//             <p className="header-subtitle">Manage your imported contacts</p>
+//           </div>
+  
+//           <button className="header-button" onClick={() => navigate("/")}>
+//             New Upload
+//           </button>
+//         </div>
+  
+//         <div>
+//           <CreateTableForContactUpload/>
+//         </div>
+//       </>
+//     );
+//   }
+//   import { ExtensionContext, window, Disposable } from "vscode";
+//   import * as vscode from "vscode";
+//   import * as dotenv from "dotenv";
+//   import * as path from "path";
+//   import {
+//     initializeGitWatching,
+//     waitForRepositories,
+//     setupRepositoryWatching,
+//     handleGitAction,
+//     showCommitAnalysisUI,
+//     getCommitAnalysisData,
+//     mapGitStatus,
+//     getFileContent,
+//     getPatchData,
+//     generateAlternativeDiff,
+//     generateEnhancedDiff,
+//     // sendToAnalysisPipeline,
+//     type AnalysisPayload,
+//     analyzeCommittedChanges,
+//     analyzeCommittedChanges1,
+//   } from "./vscode-extensionapi";
+  
+//   // Load the .env file
+//   dotenv.config({ path: path.join(__dirname, "../.env") });
+//   import { registerWebViewProvider } from "./panels/SidePanel";
+//   import { getAppInsightsInstance } from "./logging/AppInsights";
+//   import { getRepositories } from "./vscode-extensionapi";
+//   import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+  
+//   const appInsights = getAppInsightsInstance();
+  
+//   let logoutCommand: Disposable | undefined;
+  
+//   const markdownContentStore = new Map<string, string>();
+  
+//   export async function activate(context: ExtensionContext) {
+//     vscode.window.showInformationMessage(" Activated..... ");
+//     const op = window.createOutputChannel("CodeSherlockAI");
+//     op.appendLine("Extension is Activated ..... ");
+  
+//     registerWebViewProvider(context, op);
+//     registerMarkdownContentProvider(context);
+//     registerPreviewCommand(context);
+  
+//     //added
+//     const machineId = vscode.env.machineId;
+  
+//     // Check if the device ID has already been logged
+//     const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+  
+//     if (!hasLoggedDevice) {
+//       await context.globalState.update("hasLoggedDevice", true);
+//       // Log successful API call
+//       appInsights?.trackTrace({
+//         message: "User installed an CodeSherlock.ai extension",
+//         properties: { machineId, vs_code: true },
+//         severityLevel: 0,
+//       });
+//     }
+  
+//   //   const repos = await getRepositories();
+  
+//   //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+  
+//   try {
+//     const res = await analyzeUncommittedChanges1(op);
+//     op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+//   } catch (err: any) {
+//     op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+//   }
+  
+//     // const { execSync } = require("child_process");
+  
+//     // try {
+//     //   const latestCommit = execSync("git rev-parse HEAD", {
+//     //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//     //   })
+//     //     .toString()
+//     //     .trim();
+  
+//     //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//     //   op.appendLine(
+//     //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//     //   );
+//     // } catch (err: any) {
+//     //   op.appendLine(
+//     //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//     //   );
+//     // }
+
+
+//     import "./ContactUpload.css";
+//     import CreateTableForContactUpload from "./CreateTableForContactUpload";
+//     import { useNavigate,useLocation } from "react-router-dom";
+//     export default function ContactUpload() {
+//       const navigate = useNavigate();
+//       const location = useLocation();
+//       // const file = location.state?.file;
+    
+    
+//       return (
+//         <>
+//           <div className="header-container">
+//             <button className="header-button" onClick={() => navigate("/")}>
+//               ← Back to Upload
+//             </button>
+    
+//             <div className="header-title-group">
+//               <h1 className="header-title">Phonebook Data</h1>
+//               <p className="header-subtitle">Manage your imported contacts</p>
+//             </div>
+    
+//             <button className="header-button" onClick={() => navigate("/")}>
+//               New Upload
+//             </button>
+//           </div>
+    
+//           <div>
+//             <CreateTableForContactUpload/>
+//           </div>
+//         </>
+//       );
+//     }
+//     import { ExtensionContext, window, Disposable } from "vscode";
+//     import * as vscode from "vscode";
+//     import * as dotenv from "dotenv";
+//     import * as path from "path";
+//     import {
+//       initializeGitWatching,
+//       waitForRepositories,
+//       setupRepositoryWatching,
+//       handleGitAction,
+//       showCommitAnalysisUI,
+//       getCommitAnalysisData,
+//       mapGitStatus,
+//       getFileContent,
+//       getPatchData,
+//       generateAlternativeDiff,
+//       generateEnhancedDiff,
+//       // sendToAnalysisPipeline,
+//       type AnalysisPayload,
+//       analyzeCommittedChanges,
+//       analyzeCommittedChanges1,
+//     } from "./vscode-extensionapi";
+    
+//     // Load the .env file
+//     dotenv.config({ path: path.join(__dirname, "../.env") });
+//     import { registerWebViewProvider } from "./panels/SidePanel";
+//     import { getAppInsightsInstance } from "./logging/AppInsights";
+//     import { getRepositories } from "./vscode-extensionapi";
+//     import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+    
+//     const appInsights = getAppInsightsInstance();
+    
+//     let logoutCommand: Disposable | undefined;
+    
+//     const markdownContentStore = new Map<string, string>();
+    
+//     export async function activate(context: ExtensionContext) {
+//       vscode.window.showInformationMessage(" Activated..... ");
+//       const op = window.createOutputChannel("CodeSherlockAI");
+//       op.appendLine("Extension is Activated ..... ");
+    
+//       registerWebViewProvider(context, op);
+//       registerMarkdownContentProvider(context);
+//       registerPreviewCommand(context);
+    
+//       //added
+//       const machineId = vscode.env.machineId;
+    
+//       // Check if the device ID has already been logged
+//       const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+    
+//       if (!hasLoggedDevice) {
+//         await context.globalState.update("hasLoggedDevice", true);
+//         // Log successful API call
+//         appInsights?.trackTrace({
+//           message: "User installed an CodeSherlock.ai extension",
+//           properties: { machineId, vs_code: true },
+//           severityLevel: 0,
+//         });
+//       }
+    
+//     //   const repos = await getRepositories();
+    
+//     //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+    
+//     try {
+//       const res = await analyzeUncommittedChanges1(op);
+//       op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+//     } catch (err: any) {
+//       op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+//     }
+    
+//       // const { execSync } = require("child_process");
+    
+//       // try {
+//       //   const latestCommit = execSync("git rev-parse HEAD", {
+//       //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//       //   })
+//       //     .toString()
+//       //     .trim();
+    
+//       //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//       //   op.appendLine(
+//       //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//       //   );
+//       // } catch (err: any) {
+//       //   op.appendLine(
+//       //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//       //   );
+//       // }
+
+
+
+
+//       // import React from "react";
+// // import ReactDOM from "react-dom/client";
+// // import App from "./App";
+// // import { Provider } from "react-redux";
+// // import { store } from "./store";
+
+// // // Load the .env file
+// // dotenv.config({ path: path.join(__dirname, "../.env") });
+// // import { registerWebViewProvider } from "./panels/SidePanel";
+// // import { getAppInsightsInstance } from "./logging/AppInsights";
+// // import { getRepositories } from "./vscode-extensionapi";
+// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// // const appInsights = getAppInsightsInstance();
+
+// // let logoutCommand: Disposable | undefined;
+
+// // const markdownContentStore = new Map<string, string>();
+
+// // export async function activate(context: ExtensionContext) {
+// //   vscode.window.showInformationMessage(" Activated..... ");
+// //   const op = window.createOutputChannel("CodeSherlockAI");
+// //   op.appendLine("Extension is Activated ..... ");
+
+// //   registerWebViewProvider(context, op);
+// //   registerMarkdownContentProvider(context);
+// //   registerPreviewCommand(context);
+
+// //   //added
+// //   const machineId = vscode.env.machineId;
+
+// //   // Check if the device ID has already been logged
+// //   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+// //   if (!hasLoggedDevice) {
+// //     await context.globalState.update("hasLoggedDevice", true);
+// //     // Log successful API call
+// //     appInsights?.trackTrace({
+// //       message: "User installed an CodeSherlock.ai extension",
+// //       properties: { machineId, vs_code: true },
+// //       severityLevel: 0,
+// //     });
+// //   }
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+
+// //   import "./ContactUpload.css";
+// // import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// // import { useNavigate,useLocation } from "react-router-dom";
+// // export default function ContactUpload() {
+// //   const navigate = useNavigate();
+// //   const location = useLocation();
+// //   // const file = location.state?.file;
+
+
+// //   return (
+// //     <>
+// //       <div className="header-container">
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           ← Back to Upload
+// //         </button>
+
+// //         <div className="header-title-group">
+// //           <h1 className="header-title">Phonebook Data</h1>
+// //           <p className="header-subtitle">Manage your imported contacts</p>
+// //         </div>
+
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           New Upload
+// //         </button>
+// //       </div>
+
+// //       <div>
+// //         <CreateTableForContactUpload/>
+// //       </div>
+// //     </>
+// //   );
+// // }
+// // import { ExtensionContext, window, Disposable } from "vscode";
+// // import * as vscode from "vscode";
+// // import * as dotenv from "dotenv";
+// // import * as path from "path";
+// // import {
+// //   initializeGitWatching,
+// //   waitForRepositories,
+// //   setupRepositoryWatching,
+// //   handleGitAction,
+// //   showCommitAnalysisUI,
+// //   getCommitAnalysisData,
+// //   mapGitStatus,
+// //   getFileContent,
+// //   getPatchData,
+// //   generateAlternativeDiff,
+// //   generateEnhancedDiff,
+// //   // sendToAnalysisPipeline,
+// //   type AnalysisPayload,
+// //   analyzeCommittedChanges,
+// //   analyzeCommittedChanges1,
+// // } from "./vscode-extensionapi";
+
+// // // Load the .env file
+// // dotenv.config({ path: path.join(__dirname, "../.env") });
+// // import { registerWebViewProvider } from "./panels/SidePanel";
+// // import { getAppInsightsInstance } from "./logging/AppInsights";
+// // import { getRepositories } from "./vscode-extensionapi";
+// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// // const appInsights = getAppInsightsInstance();
+
+// // let logoutCommand: Disposable | undefined;
+
+// // const markdownContentStore = new Map<string, string>();
+
+// // export async function activate(context: ExtensionContext) {
+// //   vscode.window.showInformationMessage(" Activated..... ");
+// //   const op = window.createOutputChannel("CodeSherlockAI");
+// //   op.appendLine("Extension is Activated ..... ");
+
+// //   registerWebViewProvider(context, op);
+// //   registerMarkdownContentProvider(context);
+// //   registerPreviewCommand(context);
+
+// //   //added
+// //   const machineId = vscode.env.machineId;
+
+// //   // Check if the device ID has already been logged
+// //   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+// //   if (!hasLoggedDevice) {
+// //     await context.globalState.update("hasLoggedDevice", true);
+// //     // Log successful API call
+// //     appInsights?.trackTrace({
+// //       message: "User installed an CodeSherlock.ai extension",
+// //       properties: { machineId, vs_code: true },
+// //       severityLevel: 0,
+// //     });
+// //   }
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+// //   ///aknjwbshf
+// //   //testing commit
+
+
+// //   //sdfjkhdsjfherhfiu
+
+
+// //   //testing....
+// // //
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+
+// //   import "./ContactUpload.css";
+// // import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// // import { useNavigate,useLocation } from "react-router-dom";
+// // export default function ContactUpload() {
+// //   const navigate = useNavigate();
+// //   const location = useLocation();
+// //   // const file = location.state?.file;
+
+
+// //   return (
+// //     <>
+// //       <div className="header-container">
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           ← Back to Upload
+// //         </button>
+
+// //         <div className="header-title-group">
+// //           <h1 className="header-title">Phonebook Data</h1>
+// //           <p className="header-subtitle">Manage your imported contacts</p>
+// //         </div>
+
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           New Upload
+// //         </button>
+// //       </div>
+
+// //       <div>
+// //         <CreateTableForContactUpload/>
+// //       </div>
+// //     </>
+// //   );
+// // }
+// // import { ExtensionContext, window, Disposable } from "vscode";
+// // import * as vscode from "vscode";
+// // import * as dotenv from "dotenv";
+// // import * as path from "path";
+// // import {
+// //   initializeGitWatching,
+// //   waitForRepositories,
+// //   setupRepositoryWatching,
+// //   handleGitAction,
+// //   showCommitAnalysisUI,
+// //   getCommitAnalysisData,
+// //   mapGitStatus,
+// //   getFileContent,
+// //   getPatchData,
+// //   generateAlternativeDiff,
+// //   generateEnhancedDiff,
+// //   // sendToAnalysisPipeline,
+// //   type AnalysisPayload,
+// //   analyzeCommittedChanges,
+// //   analyzeCommittedChanges1,
+// // } from "./vscode-extensionapi";
+
+// // // Load the .env file
+// // dotenv.config({ path: path.join(__dirname, "../.env") });
+// // import { registerWebViewProvider } from "./panels/SidePanel";
+// // import { getAppInsightsInstance } from "./logging/AppInsights";
+// // import { getRepositories } from "./vscode-extensionapi";
+// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// // const appInsights = getAppInsightsInstance();
+
+// // let logoutCommand: Disposable | undefined;
+
+// // const markdownContentStore = new Map<string, string>();
+
+// // export async function activate(context: ExtensionContext) {
+// //   vscode.window.showInformationMessage(" Activated..... ");
+// //   const op = window.createOutputChannel("CodeSherlockAI");
+// //   op.appendLine("Extension is Activated ..... ");
+
+// //   registerWebViewProvider(context, op);
+// //   registerMarkdownContentProvider(context);
+// //   registerPreviewCommand(context);
+
+// //   //added
+// //   const machineId = vscode.env.machineId;
+
+// //   // Check if the device ID has already been logged
+// //   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+// //   if (!hasLoggedDevice) {
+// //     await context.globalState.update("hasLoggedDevice", true);
+// //     // Log successful API call
+// //     appInsights?.trackTrace({
+// //       message: "User installed an CodeSherlock.ai extension",
+// //       properties: { machineId, vs_code: true },
+// //       severityLevel: 0,
+// //     });
+// //   }
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+// //   ///aknjwbshf
+// //   //testing commit
+
+
+// //   //sdfjkhdsjfherhfiu
+
+
+// //   //testing....

@@ -1,4436 +1,1748 @@
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
+// import "./ContactUpload.css";
+// import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// import { useNavigate,useLocation } from "react-router-dom";
+// export default function ContactUpload() {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   // const file = location.state?.file;
 
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
 
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
+//   return (
+//     <>
+//       <div className="header-container">
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           ← Back to Upload
+//         </button>
+
+//         <div className="header-title-group">
+//           <h1 className="header-title">Phonebook Data</h1>
+//           <p className="header-subtitle">Manage your imported contacts</p>
+//         </div>
+
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           New Upload
+//         </button>
+//       </div>
+
+//       <div>
+//         <CreateTableForContactUpload/>
+//       </div>
+//     </>
+//   );
+// }
+// import { ExtensionContext, window, Disposable } from "vscode";
+// import * as vscode from "vscode";
+// import * as dotenv from "dotenv";
+// import * as path from "path";
+// import {
+//   initializeGitWatching,
+//   waitForRepositories,
+//   setupRepositoryWatching,
+//   handleGitAction,
+//   showCommitAnalysisUI,
+//   getCommitAnalysisData,
+//   mapGitStatus,
+//   getFileContent,
+//   getPatchData,
+//   generateAlternativeDiff,
+//   generateEnhancedDiff,
+//   // sendToAnalysisPipeline,
+//   type AnalysisPayload,
+//   analyzeCommittedChanges,
+//   analyzeCommittedChanges1,
+// } from "./vscode-extensionapi";
+
+// // Load the .env file
+// dotenv.config({ path: path.join(__dirname, "../.env") });
+// import { registerWebViewProvider } from "./panels/SidePanel";
+// import { getAppInsightsInstance } from "./logging/AppInsights";
+// import { getRepositories } from "./vscode-extensionapi";
+// import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// const appInsights = getAppInsightsInstance();
+
+// let logoutCommand: Disposable | undefined;
+
+// const markdownContentStore = new Map<string, string>();
+
+// export async function activate(context: ExtensionContext) {
+//   vscode.window.showInformationMessage(" Activated..... ");
+//   const op = window.createOutputChannel("CodeSherlockAI");
+//   op.appendLine("Extension is Activated ..... ");
+
+//   registerWebViewProvider(context, op);
+//   registerMarkdownContentProvider(context);
+//   registerPreviewCommand(context);
+
+//   //added
+//   const machineId = vscode.env.machineId;
+
+//   // Check if the device ID has already been logged
+//   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+//   if (!hasLoggedDevice) {
+//     await context.globalState.update("hasLoggedDevice", true);
+//     // Log successful API call
+//     appInsights?.trackTrace({
+//       message: "User installed an CodeSherlock.ai extension",
+//       properties: { machineId, vs_code: true },
+//       severityLevel: 0,
+//     });
 //   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
+
+// //   const repos = await getRepositories();
+
+// //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// try {
+//   const res = await analyzeUncommittedChanges1(op);
+//   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// } catch (err: any) {
+//   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
 // }
 
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const groupBy = (arr, keyFn) => {
-//   const acc = {};
-//   arr.forEach(item => {
-//     const k = keyFn(item);
-//     if (!acc[k]) {
-//       acc[k] = []; // Initialize array only for new keys
-//     }
-//     acc[k].push(item);
-//   });
-//   return acc;
-// };
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
+//   // const { execSync } = require("child_process");
 
-class SimpleEventEmitter {
-    constructor(maxHandlers = 10) {
-        this.map = new Map();
-        this.maxHandlers = maxHandlers; // Set a default limit for handlers
-    }
+//   // try {
+//   //   const latestCommit = execSync("git rev-parse HEAD", {
+//   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//   //   })
+//   //     .toString()
+//   //     .trim();
+
+//   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//   //   op.appendLine(
+//   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//   //   );
+//   // } catch (err: any) {
+//   //   op.appendLine(
+//   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//   //   );
+//   // }
+
+
+//   import "./ContactUpload.css";
+// import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// import { useNavigate,useLocation } from "react-router-dom";
+// export default function ContactUpload() {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   // const file = location.state?.file;
+
+
+//   return (
+//     <>
+//       <div className="header-container">
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           ← Back to Upload
+//         </button>
+
+//         <div className="header-title-group">
+//           <h1 className="header-title">Phonebook Data</h1>
+//           <p className="header-subtitle">Manage your imported contacts</p>
+//         </div>
+
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           New Upload
+//         </button>
+//       </div>
+
+//       <div>
+//         <CreateTableForContactUpload/>
+//       </div>
+//     </>
+//   );
+// }
+// import { ExtensionContext, window, Disposable } from "vscode";
+// import * as vscode from "vscode";
+// import * as dotenv from "dotenv";
+// import * as path from "path";
+// import {
+//   initializeGitWatching,
+//   waitForRepositories,
+//   setupRepositoryWatching,
+//   handleGitAction,
+//   showCommitAnalysisUI,
+//   getCommitAnalysisData,
+//   mapGitStatus,
+//   getFileContent,
+//   getPatchData,
+//   generateAlternativeDiff,
+//   generateEnhancedDiff,
+//   // sendToAnalysisPipeline,
+//   type AnalysisPayload,
+//   analyzeCommittedChanges,
+//   analyzeCommittedChanges1,
+// } from "./vscode-extensionapi";
+
+// // Load the .env file
+// dotenv.config({ path: path.join(__dirname, "../.env") });
+// import { registerWebViewProvider } from "./panels/SidePanel";
+// import { getAppInsightsInstance } from "./logging/AppInsights";
+// import { getRepositories } from "./vscode-extensionapi";
+// import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// const appInsights = getAppInsightsInstance();
+
+// let logoutCommand: Disposable | undefined;
+
+// const markdownContentStore = new Map<string, string>();
+
+// export async function activate(context: ExtensionContext) {
+//   vscode.window.showInformationMessage(" Activated..... ");
+//   const op = window.createOutputChannel("CodeSherlockAI");
+//   op.appendLine("Extension is Activated ..... ");
+
+//   registerWebViewProvider(context, op);
+//   registerMarkdownContentProvider(context);
+//   registerPreviewCommand(context);
+
+//   //added
+//   const machineId = vscode.env.machineId;
+
+//   // Check if the device ID has already been logged
+//   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+//   if (!hasLoggedDevice) {
+//     await context.globalState.update("hasLoggedDevice", true);
+//     // Log successful API call
+//     appInsights?.trackTrace({
+//       message: "User installed an CodeSherlock.ai extension",
+//       properties: { machineId, vs_code: true },
+//       severityLevel: 0,
+//     });
+//   }
+
+// //   const repos = await getRepositories();
+
+// //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// try {
+//   const res = await analyzeUncommittedChanges1(op);
+//   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// } catch (err: any) {
+//   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// }
+
+//   // const { execSync } = require("child_process");
+
+//   // try {
+//   //   const latestCommit = execSync("git rev-parse HEAD", {
+//   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//   //   })
+//   //     .toString()
+//   //     .trim();
+
+//   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//   //   op.appendLine(
+//   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//   //   );
+//   // } catch (err: any) {
+//   //   op.appendLine(
+//   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//   //   );
+//   // }
+
+//   ///aknjwbshf
+//   //testing commit
+
+
+//   //sdfjkhdsjfherhfiu
+
+
+
+
+
+//   import "./ContactUpload.css";
+//   import CreateTableForContactUpload from "./CreateTableForContactUpload";
+//   import { useNavigate,useLocation } from "react-router-dom";
+//   export default function ContactUpload() {
+//     const navigate = useNavigate();
+//     const location = useLocation();
+//     // const file = location.state?.file;
+  
+  
+//     return (
+//       <>
+//         <div className="header-container">
+//           <button className="header-button" onClick={() => navigate("/")}>
+//             ← Back to Upload
+//           </button>
+  
+//           <div className="header-title-group">
+//             <h1 className="header-title">Phonebook Data</h1>
+//             <p className="header-subtitle">Manage your imported contacts</p>
+//           </div>
+  
+//           <button className="header-button" onClick={() => navigate("/")}>
+//             New Upload
+//           </button>
+//         </div>
+  
+//         <div>
+//           <CreateTableForContactUpload/>
+//         </div>
+//       </>
+//     );
+//   }
+//   import { ExtensionContext, window, Disposable } from "vscode";
+//   import * as vscode from "vscode";
+//   import * as dotenv from "dotenv";
+//   import * as path from "path";
+//   import {
+//     initializeGitWatching,
+//     waitForRepositories,
+//     setupRepositoryWatching,
+//     handleGitAction,
+//     showCommitAnalysisUI,
+//     getCommitAnalysisData,
+//     mapGitStatus,
+//     getFileContent,
+//     getPatchData,
+//     generateAlternativeDiff,
+//     generateEnhancedDiff,
+//     // sendToAnalysisPipeline,
+//     type AnalysisPayload,
+//     analyzeCommittedChanges,
+//     analyzeCommittedChanges1,
+//   } from "./vscode-extensionapi";
+  
+//   // Load the .env file
+//   dotenv.config({ path: path.join(__dirname, "../.env") });
+//   import { registerWebViewProvider } from "./panels/SidePanel";
+//   import { getAppInsightsInstance } from "./logging/AppInsights";
+//   import { getRepositories } from "./vscode-extensionapi";
+//   import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+  
+//   const appInsights = getAppInsightsInstance();
+  
+//   let logoutCommand: Disposable | undefined;
+  
+//   const markdownContentStore = new Map<string, string>();
+  
+//   export async function activate(context: ExtensionContext) {
+//     vscode.window.showInformationMessage(" Activated..... ");
+//     const op = window.createOutputChannel("CodeSherlockAI");
+//     op.appendLine("Extension is Activated ..... ");
+  
+//     registerWebViewProvider(context, op);
+//     registerMarkdownContentProvider(context);
+//     registerPreviewCommand(context);
+  
+//     //added
+//     const machineId = vscode.env.machineId;
+  
+//     // Check if the device ID has already been logged
+//     const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+  
+//     if (!hasLoggedDevice) {
+//       await context.globalState.update("hasLoggedDevice", true);
+//       // Log successful API call
+//       appInsights?.trackTrace({
+//         message: "User installed an CodeSherlock.ai extension",
+//         properties: { machineId, vs_code: true },
+//         severityLevel: 0,
+//       });
+//     }
+  
+//   //   const repos = await getRepositories();
+  
+//   //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+  
+//   try {
+//     const res = await analyzeUncommittedChanges1(op);
+//     op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+//   } catch (err: any) {
+//     op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+//   }
+  
+//     // const { execSync } = require("child_process");
+  
+//     // try {
+//     //   const latestCommit = execSync("git rev-parse HEAD", {
+//     //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//     //   })
+//     //     .toString()
+//     //     .trim();
+  
+//     //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//     //   op.appendLine(
+//     //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//     //   );
+//     // } catch (err: any) {
+//     //   op.appendLine(
+//     //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//     //   );
+//     // }
+
+
+//     import "./ContactUpload.css";
+//     import CreateTableForContactUpload from "./CreateTableForContactUpload";
+//     import { useNavigate,useLocation } from "react-router-dom";
+//     export default function ContactUpload() {
+//       const navigate = useNavigate();
+//       const location = useLocation();
+//       // const file = location.state?.file;
     
-    on(evt, handler) {
-        const list = this.map.get(evt) || [];
-        if (list.length >= this.maxHandlers) {
-            throw new Error(`Cannot add more than ${this.maxHandlers} handlers for event '${evt}'.`);
-        }
-        list.push(handler);
-        this.map.set(evt, list);
-        return () => this.off(evt, handler);
-    }
     
-    off(evt, handler) {
-        const list = this.map.get(evt) || [];
-        const i = list.indexOf(handler);
-        if (i >= 0) list.splice(i, 1);
-    }
-
-    emit(evt, ...args) {
-        const list = this.map.get(evt) || [];
-        for (const fn of list) {
-            try { 
-                fn(...args); 
-            } catch (error) {
-                console.error(`Error in event handler for event '${evt}':`, error);
-            }
-        }
-    }
-}
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-// emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) {
-//         try { 
-//             fn(...args); 
-//         } catch (error) {
-//             console.error(`Error in event handler for event '${evt}':`, error);
-//         }
+//       return (
+//         <>
+//           <div className="header-container">
+//             <button className="header-button" onClick={() => navigate("/")}>
+//               ← Back to Upload
+//             </button>
+    
+//             <div className="header-title-group">
+//               <h1 className="header-title">Phonebook Data</h1>
+//               <p className="header-subtitle">Manage your imported contacts</p>
+//             </div>
+    
+//             <button className="header-button" onClick={() => navigate("/")}>
+//               New Upload
+//             </button>
+//           </div>
+    
+//           <div>
+//             <CreateTableForContactUpload/>
+//           </div>
+//         </>
+//       );
 //     }
-// }
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-emit(evt, ...args) {
-    const list = this.map.get(evt) || [];
-    for (const fn of list) {
-        try { 
-            fn(...args); 
-        } catch (error) {
-            console.error(`Error in event handler for event '${evt}':`, error);
-        }
-    }
-}
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// export default {};
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
+//     import { ExtensionContext, window, Disposable } from "vscode";
+//     import * as vscode from "vscode";
+//     import * as dotenv from "dotenv";
+//     import * as path from "path";
+//     import {
+//       initializeGitWatching,
+//       waitForRepositories,
+//       setupRepositoryWatching,
+//       handleGitAction,
+//       showCommitAnalysisUI,
+//       getCommitAnalysisData,
+//       mapGitStatus,
+//       getFileContent,
+//       getPatchData,
+//       generateAlternativeDiff,
+//       generateEnhancedDiff,
+//       // sendToAnalysisPipeline,
+//       type AnalysisPayload,
+//       analyzeCommittedChanges,
+//       analyzeCommittedChanges1,
+//     } from "./vscode-extensionapi";
+    
+//     // Load the .env file
+//     dotenv.config({ path: path.join(__dirname, "../.env") });
+//     import { registerWebViewProvider } from "./panels/SidePanel";
+//     import { getAppInsightsInstance } from "./logging/AppInsights";
+//     import { getRepositories } from "./vscode-extensionapi";
+//     import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+    
+//     const appInsights = getAppInsightsInstance();
+    
+//     let logoutCommand: Disposable | undefined;
+    
+//     const markdownContentStore = new Map<string, string>();
+    
+//     export async function activate(context: ExtensionContext) {
+//       vscode.window.showInformationMessage(" Activated..... ");
+//       const op = window.createOutputChannel("CodeSherlockAI");
+//       op.appendLine("Extension is Activated ..... ");
+    
+//       registerWebViewProvider(context, op);
+//       registerMarkdownContentProvider(context);
+//       registerPreviewCommand(context);
+    
+//       //added
+//       const machineId = vscode.env.machineId;
+    
+//       // Check if the device ID has already been logged
+//       const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+    
+//       if (!hasLoggedDevice) {
+//         await context.globalState.update("hasLoggedDevice", true);
+//         // Log successful API call
+//         appInsights?.trackTrace({
+//           message: "User installed an CodeSherlock.ai extension",
+//           properties: { machineId, vs_code: true },
+//           severityLevel: 0,
+//         });
+//       }
+    
+//     //   const repos = await getRepositories();
+    
+//     //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+    
+//     try {
+//       const res = await analyzeUncommittedChanges1(op);
+//       op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+//     } catch (err: any) {
+//       op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
 //     }
-//   };
-// };
+    
+//       // const { execSync } = require("child_process");
+    
+//       // try {
+//       //   const latestCommit = execSync("git rev-parse HEAD", {
+//       //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//       //   })
+//       //     .toString()
+//       //     .trim();
+    
+//       //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//       //   op.appendLine(
+//       //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//       //   );
+//       // } catch (err: any) {
+//       //   op.appendLine(
+//       //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//       //   );
+//       // }
 
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
+
+
+
+//       import React from "react";
+// import ReactDOM from "react-dom/client";
+// import App from "./App";
+// import { Provider } from "react-redux";
+// import { store } from "./store";
+
+// // Load the .env file
+// dotenv.config({ path: path.join(__dirname, "../.env") });
+// import { registerWebViewProvider } from "./panels/SidePanel";
+// import { getAppInsightsInstance } from "./logging/AppInsights";
+// import { getRepositories } from "./vscode-extensionapi";
+// import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// const appInsights = getAppInsightsInstance();
+
+// let logoutCommand: Disposable | undefined;
+
+// const markdownContentStore = new Map<string, string>();
+
+// export async function activate(context: ExtensionContext) {
+//   vscode.window.showInformationMessage(" Activated..... ");
+//   const op = window.createOutputChannel("CodeSherlockAI");
+//   op.appendLine("Extension is Activated ..... ");
+
+//   registerWebViewProvider(context, op);
+//   registerMarkdownContentProvider(context);
+//   registerPreviewCommand(context);
+
+//   //added
+//   const machineId = vscode.env.machineId;
+
+//   // Check if the device ID has already been logged
+//   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+//   if (!hasLoggedDevice) {
+//     await context.globalState.update("hasLoggedDevice", true);
+//     // Log successful API call
+//     appInsights?.trackTrace({
+//       message: "User installed an CodeSherlock.ai extension",
+//       properties: { machineId, vs_code: true },
+//       severityLevel: 0,
+//     });
 //   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
+
+
+
+// const repos = await getRepositories();
+
+// op.appendLine('Found Repository ...')
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+
+// //   import "./ContactUpload.css";
+// // import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// // import { useNavigate,useLocation } from "react-router-dom";
+// // export default function ContactUpload() {
+// //   const navigate = useNavigate();
+// //   const location = useLocation();
+// //   // const file = location.state?.file;
+
+
+// //   return (
+// //     <>
+// //       <div className="header-container">
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           ← Back to Upload
+// //         </button>
+
+// //         <div className="header-title-group">
+// //           <h1 className="header-title">Phonebook Data</h1>
+// //           <p className="header-subtitle">Manage your imported contacts</p>
+// //         </div>
+
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           New Upload
+// //         </button>
+// //       </div>
+
+// //       <div>
+// //         <CreateTableForContactUpload/>
+// //       </div>
+// //     </>
+// //   );
+// // }
+// // import { ExtensionContext, window, Disposable } from "vscode";
+// // import * as vscode from "vscode";
+// // import * as dotenv from "dotenv";
+// // import * as path from "path";
+// // import {
+// //   initializeGitWatching,
+// //   waitForRepositories,
+// //   setupRepositoryWatching,
+// //   handleGitAction,
+// //   showCommitAnalysisUI,
+// //   getCommitAnalysisData,
+// //   mapGitStatus,
+// //   getFileContent,
+// //   getPatchData,
+// //   generateAlternativeDiff,
+// //   generateEnhancedDiff,
+// //   // sendToAnalysisPipeline,
+// //   type AnalysisPayload,
+// //   analyzeCommittedChanges,
+// //   analyzeCommittedChanges1,
+// // } from "./vscode-extensionapi";
+
+// // // Load the .env file
+// // dotenv.config({ path: path.join(__dirname, "../.env") });
+// // import { registerWebViewProvider } from "./panels/SidePanel";
+// // import { getAppInsightsInstance } from "./logging/AppInsights";
+// // import { getRepositories } from "./vscode-extensionapi";
+// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// // const appInsights = getAppInsightsInstance();
+
+// // let logoutCommand: Disposable | undefined;
+
+// // const markdownContentStore = new Map<string, string>();
+
+// // export async function activate(context: ExtensionContext) {
+// //   vscode.window.showInformationMessage(" Activated..... ");
+// //   const op = window.createOutputChannel("CodeSherlockAI");
+// //   op.appendLine("Extension is Activated ..... ");
+
+// //   registerWebViewProvider(context, op);
+// //   registerMarkdownContentProvider(context);
+// //   registerPreviewCommand(context);
+
+// //   //added
+// //   const machineId = vscode.env.machineId;
+
+// //   // Check if the device ID has already been logged
+// //   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+// //   if (!hasLoggedDevice) {
+// //     await context.globalState.update("hasLoggedDevice", true);
+// //     // Log successful API call
+// //     appInsights?.trackTrace({
+// //       message: "User installed an CodeSherlock.ai extension",
+// //       properties: { machineId, vs_code: true },
+// //       severityLevel: 0,
+// //     });
+// //   }
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+// //   ///aknjwbshf
+// //   //testing commit
+
+
+// //   //sdfjkhdsjfherhfiu
+
+
+// //   //testing....
+// // //
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+
+// //   import "./ContactUpload.css";
+// // import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// // import { useNavigate,useLocation } from "react-router-dom";
+// // export default function ContactUpload() {
+// //   const navigate = useNavigate();
+// //   const location = useLocation();
+// //   // const file = location.state?.file;
+
+
+// //   return (
+// //     <>
+// //       <div className="header-container">
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           ← Back to Upload
+// //         </button>
+
+// //         <div className="header-title-group">
+// //           <h1 className="header-title">Phonebook Data</h1>
+// //           <p className="header-subtitle">Manage your imported contacts</p>
+// //         </div>
+
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           New Upload
+// //         </button>
+// //       </div>
+
+// //       <div>
+// //         <CreateTableForContactUpload/>
+// //       </div>
+// //     </>
+// //   );
+// // }
+// // import { ExtensionContext, window, Disposable } from "vscode";
+// // import * as vscode from "vscode";
+// // import * as dotenv from "dotenv";
+// // import * as path from "path";
+// // import {
+// //   initializeGitWatching,
+// //   waitForRepositories,
+// //   setupRepositoryWatching,
+// //   handleGitAction,
+// //   showCommitAnalysisUI,
+// //   getCommitAnalysisData,
+// //   mapGitStatus,
+// //   getFileContent,
+// //   getPatchData,
+// //   generateAlternativeDiff,
+// //   generateEnhancedDiff,
+// //   // sendToAnalysisPipeline,
+// //   type AnalysisPayload,
+// //   analyzeCommittedChanges,
+// //   analyzeCommittedChanges1,
+// // } from "./vscode-extensionapi";
+
+// // // Load the .env file
+// // dotenv.config({ path: path.join(__dirname, "../.env") });
+// // import { registerWebViewProvider } from "./panels/SidePanel";
+// // import { getAppInsightsInstance } from "./logging/AppInsights";
+// // import { getRepositories } from "./vscode-extensionapi";
+// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// // const appInsights = getAppInsightsInstance();
+
+// // let logoutCommand: Disposable | undefined;
+
+// // const markdownContentStore = new Map<string, string>();
+
+// // export async function activate(context: ExtensionContext) {
+// //   vscode.window.showInformationMessage(" Activated..... ");
+// //   const op = window.createOutputChannel("CodeSherlockAI");
+// //   op.appendLine("Extension is Activated ..... ");
+
+// //   registerWebViewProvider(context, op);
+// //   registerMarkdownContentProvider(context);
+// //   registerPreviewCommand(context);
+
+// //   //added
+// //   const machineId = vscode.env.machineId;
+
+// //   // Check if the device ID has already been logged
+// //   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+// //   if (!hasLoggedDevice) {
+// //     await context.globalState.update("hasLoggedDevice", true);
+// //     // Log successful API call
+// //     appInsights?.trackTrace({
+// //       message: "User installed an CodeSherlock.ai extension",
+// //       properties: { machineId, vs_code: true },
+// //       severityLevel: 0,
+// //     });
+// //   }
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+// //   ///aknjwbshf
+// //   //testing commit
+
+
+// //   //sdfjkhdsjfherhfiu
+
+
+// //   //testing....
+
+
+// import "./ContactUpload.css";
+// import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// import { useNavigate,useLocation } from "react-router-dom";
+// export default function ContactUpload() {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   // const file = location.state?.file;
+
+
+//   return (
+//     <>
+//       <div className="header-container">
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           ← Back to Upload
+//         </button>
+
+//         <div className="header-title-group">
+//           <h1 className="header-title">Phonebook Data</h1>
+//           <p className="header-subtitle">Manage your imported contacts</p>
+//         </div>
+
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           New Upload
+//         </button>
+//       </div>
+
+//       <div>
+//         <CreateTableForContactUpload/>
+//       </div>
+//     </>
+//   );
+// }
+// import { ExtensionContext, window, Disposable } from "vscode";
+// import * as vscode from "vscode";
+// import * as dotenv from "dotenv";
+// import * as path from "path";
+// import {
+//   initializeGitWatching,
+//   waitForRepositories,
+//   setupRepositoryWatching,
+//   handleGitAction,
+//   showCommitAnalysisUI,
+//   getCommitAnalysisData,
+//   mapGitStatus,
+//   getFileContent,
+//   getPatchData,
+//   generateAlternativeDiff,
+//   generateEnhancedDiff,
+//   // sendToAnalysisPipeline,
+//   type AnalysisPayload,
+//   analyzeCommittedChanges,
+//   analyzeCommittedChanges1,
+// } from "./vscode-extensionapi";
+
+// // Load the .env file
+// dotenv.config({ path: path.join(__dirname, "../.env") });
+// import { registerWebViewProvider } from "./panels/SidePanel";
+// import { getAppInsightsInstance } from "./logging/AppInsights";
+// import { getRepositories } from "./vscode-extensionapi";
+// import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// const appInsights = getAppInsightsInstance();
+
+// let logoutCommand: Disposable | undefined;
+
+// const markdownContentStore = new Map<string, string>();
+
+// export async function activate(context: ExtensionContext) {
+//   vscode.window.showInformationMessage(" Activated..... ");
+//   const op = window.createOutputChannel("CodeSherlockAI");
+//   op.appendLine("Extension is Activated ..... ");
+
+//   registerWebViewProvider(context, op);
+//   registerMarkdownContentProvider(context);
+//   registerPreviewCommand(context);
+
+//   //added
+//   const machineId = vscode.env.machineId;
+
+//   // Check if the device ID has already been logged
+//   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+//   if (!hasLoggedDevice) {
+//     await context.globalState.update("hasLoggedDevice", true);
+//     // Log successful API call
+//     appInsights?.trackTrace({
+//       message: "User installed an CodeSherlock.ai extension",
+//       properties: { machineId, vs_code: true },
+//       severityLevel: 0,
+//     });
 //   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
+
+// //   const repos = await getRepositories();
+
+// //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// try {
+//   const res = await analyzeUncommittedChanges1(op);
+//   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// } catch (err: any) {
+//   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
 // }
 
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
+//   // const { execSync } = require("child_process");
 
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
+//   // try {
+//   //   const latestCommit = execSync("git rev-parse HEAD", {
+//   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//   //   })
+//   //     .toString()
+//   //     .trim();
+
+//   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//   //   op.appendLine(
+//   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//   //   );
+//   // } catch (err: any) {
+//   //   op.appendLine(
+//   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//   //   );
+//   // }
+
+
+//   import "./ContactUpload.css";
+// import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// import { useNavigate,useLocation } from "react-router-dom";
+// export default function ContactUpload() {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   // const file = location.state?.file;
+
+
+//   return (
+//     <>
+//       <div className="header-container">
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           ← Back to Upload
+//         </button>
+
+//         <div className="header-title-group">
+//           <h1 className="header-title">Phonebook Data</h1>
+//           <p className="header-subtitle">Manage your imported contacts</p>
+//         </div>
+
+//         <button className="header-button" onClick={() => navigate("/")}>
+//           New Upload
+//         </button>
+//       </div>
+
+//       <div>
+//         <CreateTableForContactUpload/>
+//       </div>
+//     </>
+//   );
+// }
+// import { ExtensionContext, window, Disposable } from "vscode";
+// import * as vscode from "vscode";
+// import * as dotenv from "dotenv";
+// import * as path from "path";
+// import {
+//   initializeGitWatching,
+//   waitForRepositories,
+//   setupRepositoryWatching,
+//   handleGitAction,
+//   showCommitAnalysisUI,
+//   getCommitAnalysisData,
+//   mapGitStatus,
+//   getFileContent,
+//   getPatchData,
+//   generateAlternativeDiff,
+//   generateEnhancedDiff,
+//   // sendToAnalysisPipeline,
+//   type AnalysisPayload,
+//   analyzeCommittedChanges,
+//   analyzeCommittedChanges1,
+// } from "./vscode-extensionapi";
+
+// // Load the .env file
+// dotenv.config({ path: path.join(__dirname, "../.env") });
+// import { registerWebViewProvider } from "./panels/SidePanel";
+// import { getAppInsightsInstance } from "./logging/AppInsights";
+// import { getRepositories } from "./vscode-extensionapi";
+// import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// const appInsights = getAppInsightsInstance();
+
+// let logoutCommand: Disposable | undefined;
+
+// const markdownContentStore = new Map<string, string>();
+
+// export async function activate(context: ExtensionContext) {
+//   vscode.window.showInformationMessage(" Activated..... ");
+//   const op = window.createOutputChannel("CodeSherlockAI");
+//   op.appendLine("Extension is Activated ..... ");
+
+//   registerWebViewProvider(context, op);
+//   registerMarkdownContentProvider(context);
+//   registerPreviewCommand(context);
+
+//   //added
+//   const machineId = vscode.env.machineId;
+
+//   // Check if the device ID has already been logged
+//   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+//   if (!hasLoggedDevice) {
+//     await context.globalState.update("hasLoggedDevice", true);
+//     // Log successful API call
+//     appInsights?.trackTrace({
+//       message: "User installed an CodeSherlock.ai extension",
+//       properties: { machineId, vs_code: true },
+//       severityLevel: 0,
+//     });
 //   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
+
+// //   const repos = await getRepositories();
+
+// //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// try {
+//   const res = await analyzeUncommittedChanges1(op);
+//   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// } catch (err: any) {
+//   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// }
+
+//   // const { execSync } = require("child_process");
+
+//   // try {
+//   //   const latestCommit = execSync("git rev-parse HEAD", {
+//   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//   //   })
+//   //     .toString()
+//   //     .trim();
+
+//   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//   //   op.appendLine(
+//   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//   //   );
+//   // } catch (err: any) {
+//   //   op.appendLine(
+//   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//   //   );
+//   // }
+
+//   ///aknjwbshf
+//   //testing commit
+
+
+//   //sdfjkhdsjfherhfiu
+
+
+
+
+
+//   import "./ContactUpload.css";
+//   import CreateTableForContactUpload from "./CreateTableForContactUpload";
+//   import { useNavigate,useLocation } from "react-router-dom";
+//   export default function ContactUpload() {
+//     const navigate = useNavigate();
+//     const location = useLocation();
+//     // const file = location.state?.file;
+  
+  
+//     return (
+//       <>
+//         <div className="header-container">
+//           <button className="header-button" onClick={() => navigate("/")}>
+//             ← Back to Upload
+//           </button>
+  
+//           <div className="header-title-group">
+//             <h1 className="header-title">Phonebook Data</h1>
+//             <p className="header-subtitle">Manage your imported contacts</p>
+//           </div>
+  
+//           <button className="header-button" onClick={() => navigate("/")}>
+//             New Upload
+//           </button>
+//         </div>
+  
+//         <div>
+//           <CreateTableForContactUpload/>
+//         </div>
+//       </>
+//     );
 //   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-// // 🔍 ISSUE: EXC-100 - High Severity
-// // Lines 78-81
-// // Lack of Exception Handling in Event Emitters
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// // ✅ SOLUTION: EXC-100
-// // Implement Error Logging
-// emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) {
-//         try { 
-//             fn(...args); 
-//         } catch (error) {
-//             console.error(`Error in event handler for event '${evt}':`, error);
-//         }
+//   import { ExtensionContext, window, Disposable } from "vscode";
+//   import * as vscode from "vscode";
+//   import * as dotenv from "dotenv";
+//   import * as path from "path";
+//   import {
+//     initializeGitWatching,
+//     waitForRepositories,
+//     setupRepositoryWatching,
+//     handleGitAction,
+//     showCommitAnalysisUI,
+//     getCommitAnalysisData,
+//     mapGitStatus,
+//     getFileContent,
+//     getPatchData,
+//     generateAlternativeDiff,
+//     generateEnhancedDiff,
+//     // sendToAnalysisPipeline,
+//     type AnalysisPayload,
+//     analyzeCommittedChanges,
+//     analyzeCommittedChanges1,
+//   } from "./vscode-extensionapi";
+  
+//   // Load the .env file
+//   dotenv.config({ path: path.join(__dirname, "../.env") });
+//   import { registerWebViewProvider } from "./panels/SidePanel";
+//   import { getAppInsightsInstance } from "./logging/AppInsights";
+//   import { getRepositories } from "./vscode-extensionapi";
+//   import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+  
+//   const appInsights = getAppInsightsInstance();
+  
+//   let logoutCommand: Disposable | undefined;
+  
+//   const markdownContentStore = new Map<string, string>();
+  
+//   export async function activate(context: ExtensionContext) {
+//     vscode.window.showInformationMessage(" Activated..... ");
+//     const op = window.createOutputChannel("CodeSherlockAI");
+//     op.appendLine("Extension is Activated ..... ");
+  
+//     registerWebViewProvider(context, op);
+//     registerMarkdownContentProvider(context);
+//     registerPreviewCommand(context);
+  
+//     //added
+//     const machineId = vscode.env.machineId;
+  
+//     // Check if the device ID has already been logged
+//     const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+  
+//     if (!hasLoggedDevice) {
+//       await context.globalState.update("hasLoggedDevice", true);
+//       // Log successful API call
+//       appInsights?.trackTrace({
+//         message: "User installed an CodeSherlock.ai extension",
+//         properties: { machineId, vs_code: true },
+//         severityLevel: 0,
+//       });
 //     }
-// }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
+  
+//   //   const repos = await getRepositories();
+  
+//   //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+  
+//   try {
+//     const res = await analyzeUncommittedChanges1(op);
+//     op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+//   } catch (err: any) {
+//     op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+//   }
+  
+//     // const { execSync } = require("child_process");
+  
+//     // try {
+//     //   const latestCommit = execSync("git rev-parse HEAD", {
+//     //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//     //   })
+//     //     .toString()
+//     //     .trim();
+  
+//     //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//     //   op.appendLine(
+//     //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//     //   );
+//     // } catch (err: any) {
+//     //   op.appendLine(
+//     //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//     //   );
+//     // }
 
 
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
+//     import "./ContactUpload.css";
+//     import CreateTableForContactUpload from "./CreateTableForContactUpload";
+//     import { useNavigate,useLocation } from "react-router-dom";
+//     export default function ContactUpload() {
+//       const navigate = useNavigate();
+//       const location = useLocation();
+//       // const file = location.state?.file;
+    
+    
+//       return (
+//         <>
+//           <div className="header-container">
+//             <button className="header-button" onClick={() => navigate("/")}>
+//               ← Back to Upload
+//             </button>
+    
+//             <div className="header-title-group">
+//               <h1 className="header-title">Phonebook Data</h1>
+//               <p className="header-subtitle">Manage your imported contacts</p>
+//             </div>
+    
+//             <button className="header-button" onClick={() => navigate("/")}>
+//               New Upload
+//             </button>
+//           </div>
+    
+//           <div>
+//             <CreateTableForContactUpload/>
+//           </div>
+//         </>
+//       );
 //     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
+//     import { ExtensionContext, window, Disposable } from "vscode";
+//     import * as vscode from "vscode";
+//     import * as dotenv from "dotenv";
+//     import * as path from "path";
+//     import {
+//       initializeGitWatching,
+//       waitForRepositories,
+//       setupRepositoryWatching,
+//       handleGitAction,
+//       showCommitAnalysisUI,
+//       getCommitAnalysisData,
+//       mapGitStatus,
+//       getFileContent,
+//       getPatchData,
+//       generateAlternativeDiff,
+//       generateEnhancedDiff,
+//       // sendToAnalysisPipeline,
+//       type AnalysisPayload,
+//       analyzeCommittedChanges,
+//       analyzeCommittedChanges1,
+//     } from "./vscode-extensionapi";
+    
+//     // Load the .env file
+//     dotenv.config({ path: path.join(__dirname, "../.env") });
+//     import { registerWebViewProvider } from "./panels/SidePanel";
+//     import { getAppInsightsInstance } from "./logging/AppInsights";
+//     import { getRepositories } from "./vscode-extensionapi";
+//     import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+    
+//     const appInsights = getAppInsightsInstance();
+    
+//     let logoutCommand: Disposable | undefined;
+    
+//     const markdownContentStore = new Map<string, string>();
+    
+//     export async function activate(context: ExtensionContext) {
+//       vscode.window.showInformationMessage(" Activated..... ");
+//       const op = window.createOutputChannel("CodeSherlockAI");
+//       op.appendLine("Extension is Activated ..... ");
+    
+//       registerWebViewProvider(context, op);
+//       registerMarkdownContentProvider(context);
+//       registerPreviewCommand(context);
+    
+//       //added
+//       const machineId = vscode.env.machineId;
+    
+//       // Check if the device ID has already been logged
+//       const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+    
+//       if (!hasLoggedDevice) {
+//         await context.globalState.update("hasLoggedDevice", true);
+//         // Log successful API call
+//         appInsights?.trackTrace({
+//           message: "User installed an CodeSherlock.ai extension",
+//           properties: { machineId, vs_code: true },
+//           severityLevel: 0,
+//         });
+//       }
+    
+//     //   const repos = await getRepositories();
+    
+//     //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+    
+//     try {
+//       const res = await analyzeUncommittedChanges1(op);
+//       op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+//     } catch (err: any) {
+//       op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
 //     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// export default {};
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-// // 🔍 ISSUE: EXC-100 - High Severity
-// // Lines 78-81
-// // Lack of Exception Handling in Event Emitters
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// // ✅ SOLUTION: EXC-100
-// // Implement Error Logging
-// emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) {
-//         try { 
-//             fn(...args); 
-//         } catch (error) {
-//             console.error(`Error in event handler for event '${evt}':`, error);
-//         }
-//     }
-// }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// export default {};
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// // padding line 84
-// // padding line 85
-// // padding line 86
-// // padding line 87
-// // padding line 88
-// // padding line 89
-// // padding line 90
-// // padding line 91
-// // padding line 92
-// // padding line 93
-// // padding line 94
-// // padding line 95
-// // padding line 96
-// // padding line 97
-// // padding line 98
-// // padding line 99
-// // padding line 100
-// // padding line 101
-// // padding line 102
-// // padding line 103
-// // padding line 104
-// // padding line 105
-// // padding line 106
-// // padding line 107
-// // padding line 108
-// // padding line 109
-// // padding line 110
-// // padding line 111
-// // padding line 112
-// // padding line 113
-// // padding line 114
-// // padding line 115
-// // padding line 116
-// // padding line 117
-// // padding line 118
-// // padding line 119
-// export default {};
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// // padding line 84
-// // padding line 85
-// // padding line 86
-// // padding line 87
-// // padding line 88
-// // padding line 89
-// // padding line 90
-// // padding line 91
-// // padding line 92
-// // padding line 93
-// // padding line 94
-// // padding line 95
-// // padding line 96
-// // padding line 97
-// // padding line 98
-// // padding line 99
-// // padding line 100
-// // padding line 101
-// // padding line 102
-// // padding line 103
-// // padding line 104
-// // padding line 105
-// // padding line 106
-// // padding line 107
-// // padding line 108
-// // padding line 109
-// // padding line 110
-// // padding line 111
-// // padding line 112
-// // padding line 113
-// // padding line 114
-// // padding line 115
-// // padding line 116
-// // padding line 117
-// // padding line 118
-// // padding line 119
-// export default {};
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// // padding line 84
-// // padding line 85
-// // padding line 86
-// // padding line 87
-// // padding line 88
-// // padding line 89
-// // padding line 90
-// // padding line 91
-// // padding line 92
-// // padding line 93
-// // padding line 94
-// // padding line 95
-// // padding line 96
-// // padding line 97
-// // padding line 98
-// // padding line 99
-// // padding line 100
-// // padding line 101
-// // padding line 102
-// // padding line 103
-// // padding line 104
-// // padding line 105
-// // padding line 106
-// // padding line 107
-// // padding line 108
-// // padding line 109
-// // padding line 110
-// // padding line 111
-// // padding line 112
-// // padding line 113
-// // padding line 114
-// // padding line 115
-// // padding line 116
-// // padding line 117
-// // padding line 118
-// // padding line 119
-// export default {};
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-// // 🔍 ISSUE: EXC-100 - High Severity
-// // Lines 78-81
-// // Lack of Exception Handling in Event Emitters
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// // ✅ SOLUTION: EXC-100
-// // Implement Error Logging
-// emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) {
-//         try { 
-//             fn(...args); 
-//         } catch (error) {
-//             console.error(`Error in event handler for event '${evt}':`, error);
-//         }
-//     }
-// }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// export default {};
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// // padding line 84
-// // padding line 85
-// // padding line 86
-// // padding line 87
-// // padding line 88
-// // padding line 89
-// // padding line 90
-// // padding line 91
-// // padding line 92
-// // padding line 93
-// // padding line 94
-// // padding line 95
-// // padding line 96
-// // padding line 97
-// // padding line 98
-// // padding line 99
-// // padding line 100
-// // padding line 101
-// // padding line 102
-// // padding line 103
-// // padding line 104
-// // padding line 105
-// // padding line 106
-// // padding line 107
-// // padding line 108
-// // padding line 109
-// // padding line 110
-// // padding line 111
-// // padding line 112
-// // padding line 113
-// // padding line 114
-// // padding line 115
-// // padding line 116
-// // padding line 117
-// // padding line 118
-// // padding line 119
-// export default {};
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// // padding line 84
-// // padding line 85
-// // padding line 86
-// // padding line 87
-// // padding line 88
-// // padding line 89
-// // padding line 90
-// // padding line 91
-// // padding line 92
-// // padding line 93
-// // padding line 94
-// // padding line 95
-// // padding line 96
-// // padding line 97
-// // padding line 98
-// // padding line 99
-// // padding line 100
-// // padding line 101
-// // padding line 102
-// // padding line 103
-// // padding line 104
-// // padding line 105
-// // padding line 106
-// // padding line 107
-// // padding line 108
-// // padding line 109
-// // padding line 110
-// // padding line 111
-// // padding line 112
-// // padding line 113
-// // padding line 114
-// // padding line 115
-// // padding line 116
-// // padding line 117
-// // padding line 118
-// // padding line 119
-// export default {};
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// // padding line 84
-// // padding line 85
-// // padding line 86
-// // padding line 87
-// // padding line 88
-// // padding line 89
-// // padding line 90
-// // padding line 91
-// // padding line 92
-// // padding line 93
-// // padding line 94
-// // padding line 95
-// // padding line 96
-// // padding line 97
-// // padding line 98
-// // padding line 99
-// // padding line 100
-// // padding line 101
-// // padding line 102
-// // padding line 103
-// // padding line 104
-// // padding line 105
-// // padding line 106
-// // padding line 107
-// // padding line 108
-// // padding line 109
-// // padding line 110
-// // padding line 111
-// // padding line 112
-// // padding line 113
-// // padding line 114
-// // padding line 115
-// // padding line 116
-// // padding line 117
-// // padding line 118
-// // padding line 119
-// export default {};
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// // padding line 84
-// // padding line 85
-// // padding line 86
-// // padding line 87
-// // padding line 88
-// // padding line 89
-// // padding line 90
-// // padding line 91
-// // padding line 92
-// // padding line 93
-// // padding line 94
-// // padding line 95
-// // padding line 96
-// // padding line 97
-// // padding line 98
-// // padding line 99
-// // padding line 100
-// // padding line 101
-// // padding line 102
-// // padding line 103
-// // padding line 104
-// // padding line 105
-// // padding line 106
-// // padding line 107
-// // padding line 108
-// // padding line 109
-// // padding line 110
-// // padding line 111
-// // padding line 112
-// // padding line 113
-// // padding line 114
-// // padding line 115
-// // padding line 116
-// // padding line 117
-// // padding line 118
-// // padding line 119
-// export default {};
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// // padding line 84
-// // padding line 85
-// // padding line 86
-// // padding line 87
-// // padding line 88
-// // padding line 89
-// // padding line 90
-// // padding line 91
-// // padding line 92
-// // padding line 93
-// // padding line 94
-// // padding line 95
-// // padding line 96
-// // padding line 97
-// // padding line 98
-// // padding line 99
-// // padding line 100
-// // padding line 101
-// // padding line 102
-// // padding line 103
-// // padding line 104
-// // padding line 105
-// // padding line 106
-// // padding line 107
-// // padding line 108
-// // padding line 109
-// // padding line 110
-// // padding line 111
-// // padding line 112
-// // padding line 113
-// // padding line 114
-// // padding line 115
-// // padding line 116
-// // padding line 117
-// // padding line 118
-// // padding line 119
-// export default {};
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-// // utils120.js
-// // Lightweight utility helpers (120 lines).
-// // Generated for exact line count as requested.
-// 'use strict';
-
-// // ---- Common Utilities ----
-// export const isNil = (v) => v === null || v === undefined;
-// export const isStr = (v) => typeof v === 'string';
-// export const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
-// export const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-// export const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-// export const debounce = (fn, wait = 200) => {
-//   let t;
-//   return (...args) => {
-//     clearTimeout(t);
-//     t = setTimeout(() => fn(...args), wait);
-//   };
-// };
-// export const throttle = (fn, wait = 200) => {
-//   let last = 0;
-//   return (...args) => {
-//     const now = Date.now();
-//     if (now - last >= wait) {
-//       last = now;
-//       return fn(...args);
-//     }
-//   };
-// };
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-// interface GitInfo {
-//   organization: string;
-//   repository: string;
-//   latestCommitHash: string;
-// }
-
-// interface FileItem {
-//   filename: string;
-//   status: string;
-//   new_content: string;
-//   patch: string;
-// }
-
-// interface CommitProps {
-//   gitInfo: GitInfo | null;
-//   commitExtraInfo?: any; // Optional prop for extra commit info
-// }
-
-// interface CommitAnalysisState {
-//   running: boolean;
-//   data: any[];
-//   error: string | null;
-// }
-
-// const Commit: React.FC<CommitProps> = ({ gitInfo, commitExtraInfo }) => {
-//   const { userId, name } = useSelector(selectUser);
-//   const [uncommitFiles, setUncommitFiles] = useState<FileItem[]>([]);
-//   const [files, setFiles] = useState<FileItem[]>([]);
-//   const [commitFiles, setCommitFiles] = useState<FileItem[]>([]);
-//   const [mode, setMode] = useState<"uncommitted" | "lastCommit">("uncommitted");
-//   const [load, setLoad] = useState(false);
-//   const [, setSubmitError] = useState<string | null>(null);
-
-//   const [commitAnalysis, setCommitAnalysis] = useState<CommitAnalysisState>({
-//       running: false,
-//       data: [],
-//       error: null,
-//   });
-
-//   const [commitReview] = useCommitReviewMutation();
-//   const gitInfoRef = useRef(gitInfo);
-
-//   console.log("Git Info:", gitInfo);
-
-
-// export default {};
-
-
-
-
-// // ---- Logger ----
-// export class Logger {
-//   constructor(scope = 'app') {
-//     this.scope = scope;
-//     this.level = 'info';
-//   }
-//   fmt(level, msg) {
-//     const ts = new Date().toISOString();
-//     return `[${ts}] [${this.scope}] [${level}] ${msg}`;
-//   }
-//   info(msg) { console.log(this.fmt('info', msg)); }
-//   warn(msg) { console.warn(this.fmt('warn', msg)); }
-//   error(msg) { console.error(this.fmt('error', msg)); }
-//   debug(msg) { if (this.level === 'debug') console.debug(this.fmt('debug', msg)); }
-// }
-
-// // ---- Collection Helpers ----
-// export const groupBy = (arr, keyFn) => arr.reduce((acc, item) => {
-//   const k = keyFn(item);
-//   (acc[k] ||= []).push(item);
-//   return acc;
-// }, {});
-// export const chunk = (arr, size) => {
-//   const out = [];
-//   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-//   return out;
-// };
-// export const uniq = (arr) => Array.from(new Set(arr));
-// export const range = (n, start = 0) => Array.from({ length: n }, (_, i) => i + start);
-// export const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-// export const average = (arr) => arr.length ? sum(arr) / arr.length : 0;
-
-// // ---- SimpleEventEmitter ----
-// export class SimpleEventEmitter {
-//   constructor() {
-//     this.map = new Map();
-//   }
-//   on(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     list.push(handler);
-//     this.map.set(evt, list);
-//     return () => this.off(evt, handler);
-//   }
-//   off(evt, handler) {
-//     const list = this.map.get(evt) || [];
-//     const i = list.indexOf(handler);
-//     if (i >= 0) list.splice(i, 1);
-//   }
-//   emit(evt, ...args) {
-//     const list = this.map.get(evt) || [];
-//     for (const fn of list) try { fn(...args); } catch (_) {}
-//   }
-// }
-
-// // padding line 84
-// // padding line 85
-// // padding line 86
-// // padding line 87
-// // padding line 88
-// // padding line 89
-// // padding line 90
-// // padding line 91
-// // padding line 92
-// // padding line 93
-// // padding line 94
-// // padding line 95
-// // padding line 96
-// // padding line 97
-// // padding line 98
-// // padding line 99
-// // padding line 100
-// // padding line 101
-// // padding line 102
-// // padding line 103
-// // padding line 104
-// // padding line 105
-// // padding line 106
-// // padding line 107
-// // padding line 108
-// // padding line 109
-// // padding line 110
-// // padding line 111
-// // padding line 112
-// // padding line 113
-// // padding line 114
-// // padding line 115
-// // padding line 116
-// // padding line 117
-// // padding line 118
-// // padding line 119
-// export default {};
+    
+//       // const { execSync } = require("child_process");
+    
+//       // try {
+//       //   const latestCommit = execSync("git rev-parse HEAD", {
+//       //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+//       //   })
+//       //     .toString()
+//       //     .trim();
+    
+//       //   const res = await analyzeCommittedChanges1(latestCommit, op);
+//       //   op.appendLine(
+//       //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+//       //   );
+//       // } catch (err: any) {
+//       //   op.appendLine(
+//       //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+//       //   );
+//       // }
+
+
+
+
+//       // import React from "react";
+// // import ReactDOM from "react-dom/client";
+// // import App from "./App";
+// // import { Provider } from "react-redux";
+// // import { store } from "./store";
+
+// // // Load the .env file
+// // dotenv.config({ path: path.join(__dirname, "../.env") });
+// // import { registerWebViewProvider } from "./panels/SidePanel";
+// // import { getAppInsightsInstance } from "./logging/AppInsights";
+// // import { getRepositories } from "./vscode-extensionapi";
+// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// // const appInsights = getAppInsightsInstance();
+
+// // let logoutCommand: Disposable | undefined;
+
+// // const markdownContentStore = new Map<string, string>();
+
+// // export async function activate(context: ExtensionContext) {
+// //   vscode.window.showInformationMessage(" Activated..... ");
+// //   const op = window.createOutputChannel("CodeSherlockAI");
+// //   op.appendLine("Extension is Activated ..... ");
+
+// //   registerWebViewProvider(context, op);
+// //   registerMarkdownContentProvider(context);
+// //   registerPreviewCommand(context);
+
+// //   //added
+// //   const machineId = vscode.env.machineId;
+
+// //   // Check if the device ID has already been logged
+// //   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+// //   if (!hasLoggedDevice) {
+// //     await context.globalState.update("hasLoggedDevice", true);
+// //     // Log successful API call
+// //     appInsights?.trackTrace({
+// //       message: "User installed an CodeSherlock.ai extension",
+// //       properties: { machineId, vs_code: true },
+// //       severityLevel: 0,
+// //     });
+// //   }
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+
+// //   import "./ContactUpload.css";
+// // import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// // import { useNavigate,useLocation } from "react-router-dom";
+// // export default function ContactUpload() {
+// //   const navigate = useNavigate();
+// //   const location = useLocation();
+// //   // const file = location.state?.file;
+
+
+// //   return (
+// //     <>
+// //       <div className="header-container">
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           ← Back to Upload
+// //         </button>
+
+// //         <div className="header-title-group">
+// //           <h1 className="header-title">Phonebook Data</h1>
+// //           <p className="header-subtitle">Manage your imported contacts</p>
+// //         </div>
+
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           New Upload
+// //         </button>
+// //       </div>
+
+// //       <div>
+// //         <CreateTableForContactUpload/>
+// //       </div>
+// //     </>
+// //   );
+// // }
+// // import { ExtensionContext, window, Disposable } from "vscode";
+// // import * as vscode from "vscode";
+// // import * as dotenv from "dotenv";
+// // import * as path from "path";
+// // import {
+// //   initializeGitWatching,
+// //   waitForRepositories,
+// //   setupRepositoryWatching,
+// //   handleGitAction,
+// //   showCommitAnalysisUI,
+// //   getCommitAnalysisData,
+// //   mapGitStatus,
+// //   getFileContent,
+// //   getPatchData,
+// //   generateAlternativeDiff,
+// //   generateEnhancedDiff,
+// //   // sendToAnalysisPipeline,
+// //   type AnalysisPayload,
+// //   analyzeCommittedChanges,
+// //   analyzeCommittedChanges1,
+// // } from "./vscode-extensionapi";
+
+// // // Load the .env file
+// // dotenv.config({ path: path.join(__dirname, "../.env") });
+// // import { registerWebViewProvider } from "./panels/SidePanel";
+// // import { getAppInsightsInstance } from "./logging/AppInsights";
+// // import { getRepositories } from "./vscode-extensionapi";
+// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// // const appInsights = getAppInsightsInstance();
+
+// // let logoutCommand: Disposable | undefined;
+
+// // const markdownContentStore = new Map<string, string>();
+
+// // export async function activate(context: ExtensionContext) {
+// //   vscode.window.showInformationMessage(" Activated..... ");
+// //   const op = window.createOutputChannel("CodeSherlockAI");
+// //   op.appendLine("Extension is Activated ..... ");
+
+// //   registerWebViewProvider(context, op);
+// //   registerMarkdownContentProvider(context);
+// //   registerPreviewCommand(context);
+
+// //   //added
+// //   const machineId = vscode.env.machineId;
+
+// //   // Check if the device ID has already been logged
+// //   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+// //   if (!hasLoggedDevice) {
+// //     await context.globalState.update("hasLoggedDevice", true);
+// //     // Log successful API call
+// //     appInsights?.trackTrace({
+// //       message: "User installed an CodeSherlock.ai extension",
+// //       properties: { machineId, vs_code: true },
+// //       severityLevel: 0,
+// //     });
+// //   }
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+// //   ///aknjwbshf
+// //   //testing commit
+
+
+// //   //sdfjkhdsjfherhfiu
+
+
+// //   //testing....
+// // //
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+
+// //   import "./ContactUpload.css";
+// // import CreateTableForContactUpload from "./CreateTableForContactUpload";
+// // import { useNavigate,useLocation } from "react-router-dom";
+// // export default function ContactUpload() {
+// //   const navigate = useNavigate();
+// //   const location = useLocation();
+// //   // const file = location.state?.file;
+
+
+// //   return (
+// //     <>
+// //       <div className="header-container">
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           ← Back to Upload
+// //         </button>
+
+// //         <div className="header-title-group">
+// //           <h1 className="header-title">Phonebook Data</h1>
+// //           <p className="header-subtitle">Manage your imported contacts</p>
+// //         </div>
+
+// //         <button className="header-button" onClick={() => navigate("/")}>
+// //           New Upload
+// //         </button>
+// //       </div>
+
+// //       <div>
+// //         <CreateTableForContactUpload/>
+// //       </div>
+// //     </>
+// //   );
+// // }
+// // import { ExtensionContext, window, Disposable } from "vscode";
+// // import * as vscode from "vscode";
+// // import * as dotenv from "dotenv";
+// // import * as path from "path";
+// // import {
+// //   initializeGitWatching,
+// //   waitForRepositories,
+// //   setupRepositoryWatching,
+// //   handleGitAction,
+// //   showCommitAnalysisUI,
+// //   getCommitAnalysisData,
+// //   mapGitStatus,
+// //   getFileContent,
+// //   getPatchData,
+// //   generateAlternativeDiff,
+// //   generateEnhancedDiff,
+// //   // sendToAnalysisPipeline,
+// //   type AnalysisPayload,
+// //   analyzeCommittedChanges,
+// //   analyzeCommittedChanges1,
+// // } from "./vscode-extensionapi";
+
+// // // Load the .env file
+// // dotenv.config({ path: path.join(__dirname, "../.env") });
+// // import { registerWebViewProvider } from "./panels/SidePanel";
+// // import { getAppInsightsInstance } from "./logging/AppInsights";
+// // import { getRepositories } from "./vscode-extensionapi";
+// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
+
+// // const appInsights = getAppInsightsInstance();
+
+// // let logoutCommand: Disposable | undefined;
+
+// // const markdownContentStore = new Map<string, string>();
+
+// // export async function activate(context: ExtensionContext) {
+// //   vscode.window.showInformationMessage(" Activated..... ");
+// //   const op = window.createOutputChannel("CodeSherlockAI");
+// //   op.appendLine("Extension is Activated ..... ");
+
+// //   registerWebViewProvider(context, op);
+// //   registerMarkdownContentProvider(context);
+// //   registerPreviewCommand(context);
+
+// //   //added
+// //   const machineId = vscode.env.machineId;
+
+// //   // Check if the device ID has already been logged
+// //   const hasLoggedDevice = context.globalState.get<boolean>("hasLoggedDevice");
+
+// //   if (!hasLoggedDevice) {
+// //     await context.globalState.update("hasLoggedDevice", true);
+// //     // Log successful API call
+// //     appInsights?.trackTrace({
+// //       message: "User installed an CodeSherlock.ai extension",
+// //       properties: { machineId, vs_code: true },
+// //       severityLevel: 0,
+// //     });
+// //   }
+
+// // //   const repos = await getRepositories();
+
+// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
+
+// // try {
+// //   const res = await analyzeUncommittedChanges1(op);
+// //   op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(res, null, 2));
+// // } catch (err: any) {
+// //   op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+// // }
+
+// //   // const { execSync } = require("child_process");
+
+// //   // try {
+// //   //   const latestCommit = execSync("git rev-parse HEAD", {
+// //   //     cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? undefined,
+// //   //   })
+// //   //     .toString()
+// //   //     .trim();
+
+// //   //   const res = await analyzeCommittedChanges1(latestCommit, op);
+// //   //   op.appendLine(
+// //   //     `Analysis Result Without commit:\n${JSON.stringify(res, null, 2)}`
+// //   //   );
+// //   // } catch (err: any) {
+// //   //   op.appendLine(
+// //   //     `⚠️ Skipping initial commit analysis. Reason: ${err.message}`
+// //   //   );
+// //   // }
+
+// //   ///aknjwbshf
+// //   //testing commit
+
+
+// //   //sdfjkhdsjfherhfiu
+
+
+// //   //testing....
