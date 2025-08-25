@@ -163,6 +163,48 @@ const Commit: React.FC<CommitProps> = ({
         } finally {
             setLoad(false);
         }
+catch (error: any) {
+    let errorMessage;
+    
+    // Distinguish error types for a more specific response
+    if (error instanceof NetworkError) {
+        errorMessage = "Network error, please check your internet connection.";
+    } else if (error instanceof ValidationError) {
+        errorMessage = "Validation failed: " + error.message; 
+    } else {
+        errorMessage = error?.data?.detail ||
+            "There has been an unknown error in our system. We apologize. We are working on it. For further assistance reach out to support@codesherlock.ai.";
+    }
+
+    setCommitAnalysis(prev => ({
+        ...prev,
+        running: false,
+        error: errorMessage
+    }));
+
+    setSubmitError(errorMessage);
+}
+catch (error: any) {
+    let errorMessage;
+    
+    // Distinguish error types for a more specific response
+    if (error instanceof NetworkError) {
+        errorMessage = "Network error, please check your internet connection.";
+    } else if (error instanceof ValidationError) {
+        errorMessage = "Validation failed: " + error.message; 
+    } else {
+        errorMessage = error?.data?.detail ||
+            "There has been an unknown error in our system. We apologize. We are working on it. For further assistance reach out to support@codesherlock.ai.";
+    }
+
+    setCommitAnalysis(prev => ({
+        ...prev,
+        running: false,
+        error: errorMessage
+    }));
+
+    setSubmitError(errorMessage);
+}
     };
 
     const handleMessage = useCallback((event: MessageEvent) => {
@@ -248,6 +290,56 @@ const Commit: React.FC<CommitProps> = ({
             console.log(" Analysis started - resetting completion flag");
         }
     }, [commitAnalysis.running]);
+case "openFile": {
+  const filename = data.filename;
+  if (filename) {
+    try {
+      this._outputChannel.appendLine(`📂 Opening file: ${filename}`);
+      
+      // Get workspace folder
+      const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+      if (!workspaceFolder) {
+        this.logError("No workspace folder found", undefined, true);
+        break;
+      }
+
+      // Construct full file path
+      const filePath = vscode.Uri.joinPath(
+        workspaceFolder.uri,
+        filename
+      );
+
+      // Open the file with enhanced error handling
+      const document = await vscode.workspace.openTextDocument(
+        filePath
+      ).catch(err => { throw new Error('File could not be opened: ' + err.message) });
+
+      await vscode.window.showTextDocument(document, {
+        preview: false, // Open in a new tab
+        preserveFocus: false, // Focus the new tab
+      });
+
+      this._outputChannel.appendLine(
+        `✅ Successfully opened file: ${filename}`
+      );
+    } catch (error: any) {
+      if (error.message.includes("File could not be opened")) {
+        this.logError(`Permission denied or file not found: ${filename}`, error, true);
+        vscode.window.showErrorMessage(`Permission denied or file not found: ${filename}. ${error.message}`);
+      } else {
+        this.logError(`Failed to open file: ${filename}`, error, true);
+        vscode.window.showErrorMessage(`Failed to open file: ${filename}. ${error.message}`);
+      }
+    }
+  } else {
+    this.logError(
+      "Missing filename in openFile command",
+      undefined,
+      true
+    );
+  }
+  break;
+}
 
     useEffect(() => {
         if (gitInfoRef.current?.latestCommitHash) {
@@ -269,6 +361,92 @@ const Commit: React.FC<CommitProps> = ({
                 command: "requestCommitAnalysis",
                 commit_hash: gitInfo.latestCommitHash,
             });
+case "openFile": {
+  const filename = data.filename;
+  if (filename) {
+    try {
+      this._outputChannel.appendLine(`📂 Opening file: ${filename}`);
+      
+      // Get workspace folder
+      const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+      if (!workspaceFolder) {
+        this.logError("No workspace folder found", undefined, true);
+        break;
+      }
+
+      // Construct full file path
+      const filePath = vscode.Uri.joinPath(
+        workspaceFolder.uri,
+        filename
+case "commitAnalysisFile": {
+  if (!data || typeof data.file_name !== 'string' || data.file_name.trim() === '') {
+    this.logError("Invalid or missing 'file_name' in commitAnalysisFile command.", undefined, true);
+    break;
+  }
+
+  const fileName = data.file_name;
+  let issues = Array.isArray(data.issues) ? data.issues : [];
+  
+  if (!issues.length) {
+    this.logError("No issues provided for analysis.", undefined, true);
+    break;
+  }
+
+  this._outputChannel.appendLine(
+    `📦 Incremental file received: ${fileName} (issues=${issues.length})`
+  );
+
+  issues = filterNonOverlappingIssues(issues);
+  try {
+    const issuesObject: Record<string, any[]> = { [fileName]: issues };
+    await vscode.commands.executeCommand(
+      "codesherlock.processIssuesBackgroundSilent",
+      issuesObject
+    );
+    this._outputChannel.appendLine(
+      `✅ Incremental background processing completed for ${fileName}`
+    );
+  } catch (error: any) {
+    this.logError(
+      `Failed incremental processing for ${fileName}`,
+      error
+    );
+  }
+  break;
+}
+      );
+
+      // Open the file with enhanced error handling
+      const document = await vscode.workspace.openTextDocument(
+        filePath
+      ).catch(err => { throw new Error('File could not be opened: ' + err.message) });
+
+      await vscode.window.showTextDocument(document, {
+        preview: false, // Open in a new tab
+        preserveFocus: false, // Focus the new tab
+      });
+
+      this._outputChannel.appendLine(
+        `✅ Successfully opened file: ${filename}`
+      );
+    } catch (error: any) {
+      if (error.message.includes("File could not be opened")) {
+        this.logError(`Permission denied or file not found: ${filename}`, error, true);
+        vscode.window.showErrorMessage(`Permission denied or file not found: ${filename}. ${error.message}`);
+      } else {
+        this.logError(`Failed to open file: ${filename}`, error, true);
+        vscode.window.showErrorMessage(`Failed to open file: ${filename}. ${error.message}`);
+      }
+    }
+  } else {
+    this.logError(
+      "Missing filename in openFile command",
+      undefined,
+      true
+    );
+  }
+  break;
+}
         } else if (mode === "uncommitted") {
             postMessage({ command: "requestUncommittedAnalysis" });
         }
@@ -307,6 +485,42 @@ const Commit: React.FC<CommitProps> = ({
                     onClick={() => setMode("lastCommit")}
                 >
                     Last Commit
+case "commitAnalysisFile": {
+  if (!data || typeof data.file_name !== 'string' || data.file_name.trim() === '') {
+    this.logError("Invalid or missing 'file_name' in commitAnalysisFile command.", undefined, true);
+    break;
+  }
+
+  const fileName = data.file_name;
+  let issues = Array.isArray(data.issues) ? data.issues : [];
+  
+  if (!issues.length) {
+    this.logError("No issues provided for analysis.", undefined, true);
+    break;
+  }
+
+  this._outputChannel.appendLine(
+    `📦 Incremental file received: ${fileName} (issues=${issues.length})`
+  );
+
+  issues = filterNonOverlappingIssues(issues);
+  try {
+    const issuesObject: Record<string, any[]> = { [fileName]: issues };
+    await vscode.commands.executeCommand(
+      "codesherlock.processIssuesBackgroundSilent",
+      issuesObject
+    );
+    this._outputChannel.appendLine(
+      `✅ Incremental background processing completed for ${fileName}`
+    );
+  } catch (error: any) {
+    this.logError(
+      `Failed incremental processing for ${fileName}`,
+      error
+    );
+  }
+  break;
+}
                 </button>
             </div>
 
@@ -377,3 +591,69 @@ const Commit: React.FC<CommitProps> = ({
 };
 
 export default Commit;
+startPollingForStateChanges() {
+    // Initialize last known state
+    this.lastKnownUserData =
+      this.extensionContext.globalState.get<string>("userData");
+  
+    let timeout: NodeJS.Timeout | null = null;
+
+    // Set up an interval to poll for changes
+    this.pollingInterval = setInterval(() => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      
+      timeout = setTimeout(() => {
+        const currentUserData =
+          this.extensionContext.globalState.get<string>("userData");
+
+        // Check if user data has changed
+        if (this.lastKnownUserData !== currentUserData) {
+          this.lastKnownUserData = currentUserData; // Update last known state
+
+          // Broadcast change to all webviews
+          SidebarWebViewProvider.broadcastToAllWebviews({
+            command: "userDataResponse",
+            user: currentUserData ? JSON.parse(currentUserData) : null,
+          });
+          this._outputChannel.appendLine(
+            "🔄 Detected user data change and broadcasted to all webviews"
+          );
+        }
+      }, 5000); // Debounce to only check every 5 seconds
+    }, 2000); // Original poll set at this interval
+}
+startPollingForStateChanges() {
+    // Initialize last known state
+    this.lastKnownUserData =
+      this.extensionContext.globalState.get<string>("userData");
+  
+    let timeout: NodeJS.Timeout | null = null;
+
+    // Set up an interval to poll for changes
+    this.pollingInterval = setInterval(() => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      
+      timeout = setTimeout(() => {
+        const currentUserData =
+          this.extensionContext.globalState.get<string>("userData");
+
+        // Check if user data has changed
+        if (this.lastKnownUserData !== currentUserData) {
+          this.lastKnownUserData = currentUserData; // Update last known state
+
+          // Broadcast change to all webviews
+          SidebarWebViewProvider.broadcastToAllWebviews({
+            command: "userDataResponse",
+            user: currentUserData ? JSON.parse(currentUserData) : null,
+          });
+          this._outputChannel.appendLine(
+            "🔄 Detected user data change and broadcasted to all webviews"
+          );
+        }
+      }, 5000); // Debounce to only check every 5 seconds
+    }, 2000); // Original poll set at this interval
+}
