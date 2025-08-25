@@ -51,6 +51,16 @@
 
 // interface TrackedIssue {
 //   issue: Issue;
+let analysisResult;
+
+try {
+    if (!analysisResult) {
+        analysisResult = await analyzeUncommittedChanges1(op);
+    }
+    op.appendLine("✅ Uncommitted Analysis response:\n" + JSON.stringify(analysisResult, null, 2));
+} catch (err: any) {
+    op.appendLine("❌ Error during Uncommitted Analysis:\n" + err?.message || JSON.stringify(err));
+}
 //   originalCode: string[];
 //   greenLineCount: number;
 //   redRanges: vscode.Range[];
@@ -150,6 +160,19 @@
 //     try {
 //       // Resolve file path but don't check if it exists
 //       const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+import * as path from "path";
+
+let absolutePath: string;
+if (path.isAbsolute(filePath)) {
+    absolutePath = filePath;
+} else {
+    absolutePath = path.join(workspaceFolder.uri.fsPath, filePath);
+}
+
+// Validate the resolved path
+if (!absolutePath.startsWith(workspaceFolder.uri.fsPath)) {
+    throw new Error(`Access to file outside of workspace is denied: ${absolutePath}`);
+}
 //       if (!workspaceFolder) {
 //         op?.appendLine("❌ No workspace folder found");
 //         continue;
@@ -1354,6 +1377,19 @@
 //   //       start_line: 52,
 //   //       end_line: 125
 //   //     }
+const provider = new (class implements vscode.TextDocumentContentProvider {
+  onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
+  onDidChange = this.onDidChangeEmitter.event;
+  provideTextDocumentContent(uri: vscode.Uri) {
+    return fixedText;
+  }
+})();
+const registration = vscode.workspace.registerTextDocumentContentProvider(scheme, provider);
+
+// Use the provider...
+
+// Cleanup after processing to prevent memory leaks
+registration.dispose();
 //   //   ],
 //   //   "src/components/CreateTableForContactUpload.js": [
 //   //     {
