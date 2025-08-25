@@ -8461,9 +8461,6 @@ export async function activate(context: ExtensionContext, outputChannel: OutputC
 // //     });
 // //   }
 
-// // //   const repos = await getRepositories();
-
-// // //   op.appendLine(`Found Repo:\n${JSON.stringify(repos, null, 2)}`);
 
 // // try {
 // //   const res = await analyzeUncommittedChanges1(op);
