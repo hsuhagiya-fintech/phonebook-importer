@@ -3,15 +3,15 @@
 // import { postMessage } from "../../shared/vscode/vscode-api";
 
 
-// declare global {
-//   interface Window {
-//     acquireVsCodeApi?: () => {
-//       postMessage: (message: any) => void;
-//       getState: () => any;
-//       setState: (state: any) => void;
-//     };
-//   }
-// }
+declare global {
+  interface Window {
+    acquireVsCodeApi?: () => {
+      postMessage: (message: any) => void;
+      getState: () => any;
+      setState: (state: any) => void;
+    };
+  }
+}
 
 // interface FileAnalysis {
 //   file_name: string;
