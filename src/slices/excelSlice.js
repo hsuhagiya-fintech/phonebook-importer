@@ -1,15 +1,3 @@
-// // import React from "react";
-// // import ReactDOM from "react-dom/client";
-// // import App from "./App";
-// // import { Provider } from "react-redux";
-// // import { store } from "./store";
-
-// // // Load the .env file
-// // dotenv.config({ path: path.join(__dirname, "../.env") });
-// // import { registerWebViewProvider } from "./panels/SidePanel";
-// // import { getAppInsightsInstance } from "./logging/AppInsights";
-// // import { getRepositories } from "./vscode-extensionapi";
-// // import {analyzeUncommittedChanges1} from "./vscode-extensionapi"
 
 // // const appInsights = getAppInsightsInstance();
 export async function activate(context: ExtensionContext, appInsights: AppInsightsInstance) {

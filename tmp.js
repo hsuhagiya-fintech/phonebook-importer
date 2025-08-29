@@ -9,11 +9,27 @@
 // users = []; // missing 'let' or 'const'
 // currentUserId = 0; // global counter that can collide in async flows
 // let cache = {}; // never invalidated
-// class UserManager {
-//   constructor() {
-//     this.users = [];
-//     this.currentUserId = 0;
-//     this.cache = {};
+class UserManager {
+  constructor(UserClass) {
+    this.users = [];
+    this.currentUserId = 0;
+    this.cache = {};
+    this.UserClass = UserClass; // Store the injected dependency
+  }
+
+  addUser(name, email) {
+    const user = new this.UserClass(name, email); // Use the injected User class
+    this.users.push(user);
+    return user.id;
+  }
+
+  getUserById(id) {
+    return this.users.find(user => user.id === id) || null;
+  }
+}
+
+// Example of usage with dependency injection:
+const userManager = new UserManager(User); // Inject User class
 //   }
 
 //   addUser(name, email) {
@@ -154,13 +170,14 @@
 //     }
 // };
 
-// async function saveUserToApi(user) {
-//   // ❌ resolves before work done, forgets to await
-//   setTimeout(() => {
-//     // pretend to save
-//     log("Saved user", user.id);
-//   }, 500);
-//   return { ok: true, id: user.id };
+async function saveUserToApi(user) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      log("Saved user", user.id);
+      resolve({ ok: true, id: user.id });
+    }, 500);
+  });
+}
 // }
 
 // /* ===========================
