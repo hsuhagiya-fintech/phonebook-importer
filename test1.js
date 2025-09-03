@@ -88,20 +88,51 @@ class TaskManager {
         return JSON.stringify(this.tasks, null, 2);
     }
 
-    importTasks(jsonData) {
-        try {
-            const importedTasks = JSON.parse(jsonData);
-            if (Array.isArray(importedTasks)) {
-                this.tasks = importedTasks;
-                this.currentId = Math.max(0, ...this.tasks.map(t => t.id)) + 1;
-                this.saveToStorage();
-                return true;
-            }
-        } catch (error) {
-            console.error('Invalid JSON data');
+importTasks(jsonData) {
+    try {
+        const importedTasks = JSON.parse(jsonData);
+if (Array.isArray(importedTasks) && importedTasks.every(task => 
+    task.id !== undefined && 
+    task.title !== undefined && 
+    task.description !== undefined)) {
+    this.tasks = importedTasks;
+    this.currentId = Math.max(0, ...this.tasks.map(t => t.id)) + 1;
+    this.saveToStorage();
+    return true;
+} else {
+    const invalidTasks = importedTasks.filter(task => 
+        task.id === undefined || 
+        task.title === undefined || 
+        task.description === undefined);
+    console.error('Imported tasks do not have the required structure', invalidTasks);
+}
+    } catch (error) {
+importTasks(jsonData) {
+    try {
+        const importedTasks = JSON.parse(jsonData);
+        if (Array.isArray(importedTasks) && importedTasks.every(task => 
+            task.id !== undefined && 
+            task.title !== undefined && 
+            task.description !== undefined)) {
+            this.tasks = importedTasks;
+            this.currentId = Math.max(0, ...this.tasks.map(t => t.id)) + 1;
+            this.saveToStorage();
+            return true;
+        } else {
+            const invalidTasks = importedTasks.filter(task => 
+                task.id === undefined || 
+                task.title === undefined || 
+                task.description === undefined);
+            console.error('Imported tasks do not have the required structure', { invalidTasks, originalData: jsonData });
         }
-        return false;
+    } catch (error) {
+        console.error('Invalid JSON data', { error: error.message, attemptedData: jsonData });
     }
+    return false;
+}
+    }
+    return false;
+}
 }
 
 // Example usage:

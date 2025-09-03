@@ -150,11 +150,27 @@ class Calculator {
     }
 }
 
-// Example usage:
-// const calc = new Calculator();
-// calc.appendNumber('5');
-// calc.appendNumber('3');
-// calc.chooseOperation('+');
-// calc.appendNumber('2');
-// calc.compute();
-// console.log(calc.getCurrentDisplay()); // Output: 55
+function runExample() {
+    const calc = new Calculator();
+    try {
+        calc.appendNumber('5');
+        calc.appendNumber('3');
+        calc.chooseOperation('+');
+        calc.appendNumber('2');
+        calc.compute();
+        console.log(calc.getCurrentDisplay()); // Output: 55
+    } catch (error) {
+        console.error("An error occurred while performing calculations:", error);
+    }
+}
+
+runExample();
+
+runExample();
+const calc = new Calculator();
+calc.appendNumber('5');
+calc.appendNumber('3');
+calc.chooseOperation('+');
+calc.appendNumber('2');
+calc.compute();
+console.log(calc.getCurrentDisplay()); // Output: 55

@@ -18,6 +18,14 @@ class UserManager {
   }
 
   addUser(name, email) {
+    if (typeof name !== 'string' || name.trim() === '') {
+      throw new Error('Invalid name: must be a non-empty string.');
+    }
+
+    if (typeof email !== 'string' || !isEmail(email)) {
+      throw new Error('Invalid email: must be a valid email address.');
+    }
+
     const user = new this.UserClass(name, email); // Use the injected User class
     this.users.push(user);
     return user.id;

@@ -122,8 +122,8 @@ class WeatherSimulator {
 }
 
 // Example usage:
-// const weather = new WeatherSimulator();
-// weather.addLocation('London', 51.5074, -0.1278, 35);
-// weather.addLocation('Tokyo', 35.6762, 139.6503, 40);
-// const forecast = weather.generateWeather('London', 3);
-// console.log(weather.generateWeatherReport('London'));
+const weather = new WeatherSimulator();
+weather.addLocation('London', 51.5074, -0.1278, 35);
+weather.addLocation('Tokyo', 35.6762, 139.6503, 40);
+const forecast = weather.generateWeather('London', 3);
+console.log(weather.generateWeatherReport('London'));

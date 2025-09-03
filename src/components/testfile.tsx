@@ -56,34 +56,43 @@ const CommitAnalysis: React.FC<CommitAnalysisProps> = ({ commitAnalysis }) => {
     if (!commitAnalysis?.data || commitAnalysis.data.length === 0) return;
 
     setHasAttempted(true);
-    console.log("CommitAnalysis.data:", commitAnalysis.data);
+import { Logger } from "some-logging-library";
 
-    commitAnalysis.data.forEach((file: any) => {
-      const fileName = file?.file_name || "Unknown";
-      if (sentFilesRef.current.has(fileName)) return;
+Logger.info("CommitAnalysis.data:", commitAnalysis.data);
 
-      const issues: any[] = [];
-      file?.analysis?.forEach((analysisItem: any) => {
-        analysisItem?.issue_items?.forEach((issue: any) => {
-          issues.push(issue);
-        });
-      });
+interface IssueItem {
+  // Define expected properties for issue items.
+}
 
+interface FileAnalysis {
+  file_name: string;
+  analysis?: {
+    issue_items?: IssueItem[];
+  }[];
+}
+interface IssueItem {
+  id: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high';
+  // Add any other relevant properties based on data usage within the component.
+}
 
-      if (issues.length > 0) {
-        allFilesWithIssues[fileName] = [
-          ...(allFilesWithIssues[fileName] || []),
-          ...issues,
-        ];
-
-        postMessage({
-          command: "commitAnalysisFile",
+const issues: IssueItem[] = [];
           file_name: fileName,
           issues,
-        });
-        sentFilesRef.current.add(fileName);
-      }
+commitAnalysis.data.forEach((file: FileAnalysis) => {
+  const fileName = file.file_name || "Unknown";
+  ...
+commitAnalysis.data.forEach((file: FileAnalysis) => {
+  const fileName = file.file_name || "Unknown";
+  if (sentFilesRef.current.has(fileName)) return;
+
+  const issues: IssueItem[] = [];
+  file.analysis?.forEach((analysisItem) => {
+    analysisItem.issue_items?.forEach((issue: IssueItem) => {
+      issues.push(issue);
     });
+  });
   }, [commitAnalysis?.data]);
 
   // Track when analysis starts
